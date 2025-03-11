@@ -1,0 +1,3 @@
+[submodule "npm-common-config"]
+	path = npm-common-config
+	url = ../common-ci-configuration.git

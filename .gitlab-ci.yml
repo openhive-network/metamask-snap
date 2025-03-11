@@ -1,0 +1,69 @@
+image: node:20.18.3
+
+stages:
+  - build
+  - deploy
+
+variables:
+  GIT_DEPTH: 0
+  GIT_STRATEGY: clone
+  GIT_SUBMODULE_STRATEGY: recursive
+
+cache:
+  key:
+    files:
+      - pnpm-lock.yaml
+  paths:
+    - node_modules/
+    - .pnpm-store/
+
+default:
+  tags:
+    - public-runner-docker
+
+.npm_based_job:
+  before_script:
+    - corepack enable
+    - corepack prepare pnpm@10.0.0 --activate
+    - pnpm config set store-dir .pnpm-store
+    - pnpm install
+
+build:
+  extends: .npm_based_job
+  stage: build
+  script:
+    - pnpm build
+    - pnpm pack
+  artifacts:
+    paths:
+      - hiveio-metamask-snap-*.tgz
+    when: always
+    expire_in: 1 week
+
+publish_dev_package:
+  extends: .npm_based_job
+  stage: deploy
+  variables:
+    REGISTRY_URL: "gitlab.syncad.com/api/v4/projects/${CI_PROJECT_ID}/packages/npm/"
+    PUBLISH_TOKEN: "${CI_JOB_TOKEN}"
+  script:
+    - echo "@hiveio:registry=https://${REGISTRY_URL}" > .npmrc
+    - echo "//${REGISTRY_URL}:_authToken=\"${PUBLISH_TOKEN}\"" >> .npmrc
+    - pnpm publish --no-git-checks --access=public hiveio-metamask-snap-*.tgz
+  needs:
+    - job: build
+      artifacts: true
+
+publish_npmjs_package:
+  extends: .npm_based_job
+  stage: deploy
+  variables:
+    REGISTRY_URL: "registry.npmjs.org/"
+    PUBLISH_TOKEN: "${INTERNAL_HIDDEN_PUBLISH_TOKEN}"
+  script:
+    - echo "@hiveio:registry=https://${REGISTRY_URL}" > .npmrc
+    - echo "//${REGISTRY_URL}:_authToken=\"${PUBLISH_TOKEN}\"" >> .npmrc
+    - pnpm publish --no-git-checks --access=public hiveio-metamask-snap-*.tgz
+  needs:
+    - job: build
+      artifacts: true

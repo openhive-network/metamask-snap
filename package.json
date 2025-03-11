@@ -1,0 +1,47 @@
+{
+  "name": "@hiveio/metamask-snap",
+  "version": "1.0.0",
+  "description": "Hive wallet extension allowing you to sign transactions using keys derived from your Metamask wallet",
+  "main": "./dist/bundle.js",
+  "files": [
+    "dist/bundle.js",
+    "src/assets/icon.svg",
+    "snap.manifest.json"
+  ],
+  "private": false,
+  "homepage": "https://gitlab.syncad.com/hive/metamask-snap#readme",
+  "bugs": {
+    "url": "https://gitlab.syncad.com/hive/metamask-snap/-/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://gitlab.syncad.com/hive/metamask-snap.git"
+  },
+  "license": "MIT",
+  "author": {
+    "name": "Hive Community"
+  },
+  "packageManager": "pnpm@10.0.0+sha512.b8fef5494bd3fe4cbd4edabd0745df2ee5be3e4b0b8b08fa643aa3e4c6702ccc0f00d68fa8a8c9858a735a0032485a44990ed2810526c875e416f001b17df12b",
+  "engines": {
+    "node": "^20.18.1 || >= 21.2"
+  },
+  "type": "commonjs",
+  "scripts": {
+    "prebuild": "./scripts/snapper.sh",
+    "build": "mm-snap build",
+    "prepublishOnly": "mm-snap manifest",
+    "serve": "mm-snap serve",
+    "prestart": "npm run prebuild",
+    "start": "mm-snap watch"
+  },
+  "devDependencies": {
+    "@hiveio/beekeeper": "1.27.10-250304140859",
+    "@hiveio/wax": "1.27.6-rc7-250304235913",
+    "@metamask/key-tree": "^10.0.2",
+    "@metamask/snaps-cli": "~6.6.0",
+    "@metamask/snaps-sdk": "~6.14.0",
+    "@metamask/utils": "^11.2.0",
+    "@sayfer_io/snapper": "^0.19.0",
+    "typescript": "catalog:typescript-toolset"
+  }
+}
