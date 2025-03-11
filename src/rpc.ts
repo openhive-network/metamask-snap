@@ -24,6 +24,28 @@ export type SignTransactionRequest = {
   };
 }
 
+export type SignBufferRequest = {
+  method: 'hive_encrypt';
+  params: {
+    buffer: string;
+    firstKey: KeyIndex;
+    secondKey?: KeyIndex;
+  };
+}
+
+export type DecodeBufferRequest = {
+  method: 'hive_decrypt';
+  params: {
+    buffer: string;
+    firstKey: KeyIndex;
+    secondKey?: KeyIndex;
+  };
+}
+
+export type BufferResponse = {
+  buffer: string;
+}
+
 export type GetPublicKeyResponse = {
   publicKeys: PublicKeyData[];
 }
@@ -32,5 +54,5 @@ export type SignTransactionResponse = {
   signatures: THexString[];
 }
 
-export type RpcRequest = GetPublicKeyRequest | SignTransactionRequest;
-export type RpcResponse = GetPublicKeyResponse | SignTransactionResponse;
+export type RpcRequest = GetPublicKeyRequest | SignTransactionRequest | SignBufferRequest | DecodeBufferRequest;
+export type RpcResponse = GetPublicKeyResponse | SignTransactionResponse | BufferResponse;

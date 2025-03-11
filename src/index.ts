@@ -1,4 +1,6 @@
 import type { RpcRequest, RpcResponse } from './rpc';
+import { decodeBuffer } from './snap/decodeBuffer';
+import { encodeBuffer } from './snap/encodeBuffer';
 import { getPublicKeys } from './snap/getPublicKeys';
 import { signTransaction } from './snap/signTransaction';
 
@@ -26,7 +28,17 @@ export const onRpcRequest = async ({
     case 'hive_signTransaction':
       return {
         signatures: await signTransaction(origin, request.params.transaction, request.params.keys)
-      }
+      };
+
+    case 'hive_decrypt':
+      return {
+        buffer: await decodeBuffer(origin, request.params.buffer, request.params.firstKey, request.params.secondKey)
+      };
+
+    case 'hive_encrypt':
+      return {
+        buffer: await encodeBuffer(origin, request.params.buffer, request.params.firstKey, request.params.secondKey)
+      };
 
     default:
       throw new Error('Method not found.');

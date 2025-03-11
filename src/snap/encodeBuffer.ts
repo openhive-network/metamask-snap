@@ -3,26 +3,24 @@ import { getWax } from "../hive/wax";
 import { remove0x } from "@metamask/utils";
 import { keyIndexToPath } from "../utils/key-management";
 import { getTempWallet } from "../hive/beekeeper";
-import { ConfirmTransactionSign } from "./dialogs/ConfirmTransactionSign";
-import type { THexString } from "@hiveio/wax";
 import { SLIP10Node } from "@metamask/key-tree";
+import type { TPublicKey } from "@hiveio/wax";
+import { ConfirmBufferSign } from "./dialogs/ConfirmBufferSign";
 
-export const signTransaction = async (origin: string, transaction: string, keys: KeyIndex[]): Promise<THexString[]> => {
-  if (keys.length < 1)
-    throw new Error('No keys provided');
+export const encodeBuffer = async (origin: string, buffer: string, firstKey: KeyIndex, secondKey?: KeyIndex): Promise<string> => {
+  const keys = secondKey ? [ firstKey, secondKey ] : [ firstKey ];
 
-  const confirmSign = await ConfirmTransactionSign(origin, transaction, keys);
+  const confirmDecode = await ConfirmBufferSign(origin, buffer, keys);
 
-  if(!confirmSign)
-    throw new Error('User denied the transaction');
+  if(!confirmDecode)
+    throw new Error('User denied the buffer decode');
 
-  // The order is important: First create wax, then transaction and if all success then create wallet
+  // The order is important: First create wax, then create wallet
   const wax = await getWax();
-  const tx = wax.createTransactionFromJson(transaction);
   const wallet = await getTempWallet();
 
   try {
-    const signatures: THexString[] = [];
+    const publicKeys: TPublicKey[] = [];
 
     for(const key of keys) {
       const snapResponse = await snap.request({
@@ -42,12 +40,12 @@ export const signTransaction = async (origin: string, transaction: string, keys:
 
       const publicKey = await wallet.importKey(wif);
 
-      const signature = tx.sign(wallet, publicKey);
-
-      signatures.push(signature);
+      publicKeys.push(publicKey);
     }
 
-    return signatures;
+    const response = wax.encrypt(wallet, buffer, ...(publicKeys as [TPublicKey]));
+
+    return response;
   } finally {
     wallet.close();
   }

@@ -3,27 +3,23 @@ import { getWax } from "../hive/wax";
 import { remove0x } from "@metamask/utils";
 import { keyIndexToPath } from "../utils/key-management";
 import { getTempWallet } from "../hive/beekeeper";
-import { ConfirmTransactionSign } from "./dialogs/ConfirmTransactionSign";
-import type { THexString } from "@hiveio/wax";
+import { ConfirmBufferDecode } from "./dialogs/ConfirmBufferDecode";
 import { SLIP10Node } from "@metamask/key-tree";
+import type { THexString } from "@hiveio/wax";
 
-export const signTransaction = async (origin: string, transaction: string, keys: KeyIndex[]): Promise<THexString[]> => {
-  if (keys.length < 1)
-    throw new Error('No keys provided');
+export const decodeBuffer = async (origin: string, buffer: THexString, firstKey: KeyIndex, secondKey?: KeyIndex): Promise<string> => {
+  const keys = secondKey ? [ firstKey, secondKey ] : [ firstKey ];
 
-  const confirmSign = await ConfirmTransactionSign(origin, transaction, keys);
+  const confirmDecode = await ConfirmBufferDecode(origin, buffer, keys);
 
-  if(!confirmSign)
-    throw new Error('User denied the transaction');
+  if(!confirmDecode)
+    throw new Error('User denied the buffer decode');
 
-  // The order is important: First create wax, then transaction and if all success then create wallet
+  // The order is important: First create wax, then create wallet
   const wax = await getWax();
-  const tx = wax.createTransactionFromJson(transaction);
   const wallet = await getTempWallet();
 
   try {
-    const signatures: THexString[] = [];
-
     for(const key of keys) {
       const snapResponse = await snap.request({
         method: 'snap_getBip32Entropy',
@@ -40,14 +36,12 @@ export const signTransaction = async (origin: string, transaction: string, keys:
 
       const wif = wax.convertRawPrivateKeyToWif(remove0x(node.privateKey));
 
-      const publicKey = await wallet.importKey(wif);
-
-      const signature = tx.sign(wallet, publicKey);
-
-      signatures.push(signature);
+      await wallet.importKey(wif);
     }
 
-    return signatures;
+    const response = wax.decrypt(wallet, buffer);
+
+    return response;
   } finally {
     wallet.close();
   }
