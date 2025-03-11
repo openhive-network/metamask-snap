@@ -15,12 +15,13 @@ export const ConfirmBufferSign = (origin: string, buffer: string, firstKey: KeyI
           Confirm if you want to sign it using your:
         </Text>
         <Text>
-          - <Bold>{firstKeykey.role}</Bold> key (account index: <Italic>#{ String(firstKey.accountIndex ?? 0) }</Italic>)
+          - <Bold>{firstKey.role}</Bold> key (account index: <Italic>#{ String(firstKey.accountIndex ?? 0) }</Italic>)
         </Text>
+        <Text>This message will be encrypted for: </Text>
         { secondKey ? (typeof secondKey === "string" ?
-          <Text>This message will be encrypted for: <Copyable value={secondKey}/></Text> :
-          <Text>This message will be encrypted for: <Bold>{secondKey.role}</Bold> key (account index: <Italic>#{ String(secondKey.accountIndex ?? 0) }</Italic>)</Text>
-        ) : <Text>This message can only be viewed by you</Text> }
+          <Copyable value={ secondKey }/> :
+          <Text>- <Bold>{secondKey.role}</Bold> key (account index: <Italic>#{ String(secondKey.accountIndex ?? 0) }</Italic>)</Text>
+        ) : <Text>- <Bold>yourself</Bold></Text> }
       </Box>
     )
   }
