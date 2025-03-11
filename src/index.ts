@@ -32,7 +32,7 @@ export const onRpcRequest = async ({
 
     case 'hive_decrypt':
       return {
-        buffer: await decodeBuffer(origin, request.params.buffer, request.params.firstKey, request.params.secondKey)
+        buffer: await decodeBuffer(origin, request.params.buffer, request.params.firstKey)
       };
 
     case 'hive_encrypt':

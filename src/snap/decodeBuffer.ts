@@ -7,10 +7,8 @@ import { ConfirmBufferDecode } from "./dialogs/ConfirmBufferDecode";
 import { SLIP10Node } from "@metamask/key-tree";
 import type { THexString } from "@hiveio/wax";
 
-export const decodeBuffer = async (origin: string, buffer: THexString, firstKey: KeyIndex, secondKey?: KeyIndex): Promise<string> => {
-  const keys = secondKey ? [ firstKey, secondKey ] : [ firstKey ];
-
-  const confirmDecode = await ConfirmBufferDecode(origin, buffer, keys);
+export const decodeBuffer = async (origin: string, buffer: THexString, decodeKey: KeyIndex): Promise<string> => {
+  const confirmDecode = await ConfirmBufferDecode(origin, buffer, decodeKey);
 
   if(!confirmDecode)
     throw new Error('User denied the buffer decode');
@@ -20,24 +18,22 @@ export const decodeBuffer = async (origin: string, buffer: THexString, firstKey:
   const wallet = await getTempWallet();
 
   try {
-    for(const key of keys) {
-      const snapResponse = await snap.request({
-        method: 'snap_getBip32Entropy',
-        params: {
-          curve: "secp256k1",
-          path: keyIndexToPath(key)
-        }
-      });
+    const snapResponse = await snap.request({
+      method: 'snap_getBip32Entropy',
+      params: {
+        curve: "secp256k1",
+        path: keyIndexToPath(decodeKey)
+      }
+    });
 
-      const node = await SLIP10Node.fromJSON(snapResponse);
+    const node = await SLIP10Node.fromJSON(snapResponse);
 
-      if (!node.privateKey)
-        throw new Error('No private key found');
+    if (!node.privateKey)
+      throw new Error('No private key found');
 
-      const wif = wax.convertRawPrivateKeyToWif(remove0x(node.privateKey));
+    const wif = wax.convertRawPrivateKeyToWif(remove0x(node.privateKey));
 
-      await wallet.importKey(wif);
-    }
+    await wallet.importKey(wif);
 
     const response = wax.decrypt(wallet, buffer);
 

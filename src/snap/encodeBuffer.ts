@@ -3,14 +3,11 @@ import { getWax } from "../hive/wax";
 import { remove0x } from "@metamask/utils";
 import { keyIndexToPath } from "../utils/key-management";
 import { getTempWallet } from "../hive/beekeeper";
-import { SLIP10Node } from "@metamask/key-tree";
-import type { TPublicKey } from "@hiveio/wax";
 import { ConfirmBufferSign } from "./dialogs/ConfirmBufferSign";
+import { SLIP10Node } from "@metamask/key-tree";
 
-export const encodeBuffer = async (origin: string, buffer: string, firstKey: KeyIndex, secondKey?: KeyIndex): Promise<string> => {
-  const keys = secondKey ? [ firstKey, secondKey ] : [ firstKey ];
-
-  const confirmDecode = await ConfirmBufferSign(origin, buffer, keys);
+export const encodeBuffer = async (origin: string, buffer: string, firstKey: KeyIndex, secondKey?: KeyIndex | string): Promise<string> => {
+  const confirmDecode = await ConfirmBufferSign(origin, buffer, firstKey, secondKey);
 
   if(!confirmDecode)
     throw new Error('User denied the buffer decode');
@@ -20,30 +17,40 @@ export const encodeBuffer = async (origin: string, buffer: string, firstKey: Key
   const wallet = await getTempWallet();
 
   try {
-    const publicKeys: TPublicKey[] = [];
+    const firstKeyBip32 = await snap.request({
+      method: 'snap_getBip32Entropy',
+      params: {
+        curve: "secp256k1",
+        path: keyIndexToPath(firstKey)
+      }
+    });
+    const nodeFirstKey = await SLIP10Node.fromJSON(firstKeyBip32);
+    if (!nodeFirstKey.privateKey)
+      throw new Error('No private key found');
 
-    for(const key of keys) {
-      const snapResponse = await snap.request({
+    const wifFirstKey = wax.convertRawPrivateKeyToWif(remove0x(nodeFirstKey.privateKey));
+    const publicKeyFirstKey = await wallet.importKey(wifFirstKey);
+
+    let publicKeySecondKey: string | undefined;
+    if(typeof secondKey === "string")
+      publicKeySecondKey = secondKey;
+    else if (secondKey) {
+      const secondKeyBip32 = await snap.request({
         method: 'snap_getBip32Entropy',
         params: {
           curve: "secp256k1",
-          path: keyIndexToPath(key)
+          path: keyIndexToPath(secondKey)
         }
       });
-
-      const node = await SLIP10Node.fromJSON(snapResponse);
-
-      if (!node.privateKey)
+      const nodeSecondKey = await SLIP10Node.fromJSON(secondKeyBip32);
+      if (!nodeSecondKey.privateKey)
         throw new Error('No private key found');
 
-      const wif = wax.convertRawPrivateKeyToWif(remove0x(node.privateKey));
-
-      const publicKey = await wallet.importKey(wif);
-
-      publicKeys.push(publicKey);
+      const wifSecondKey = wax.convertRawPrivateKeyToWif(remove0x(nodeSecondKey.privateKey));
+      publicKeySecondKey = await wallet.importKey(wifSecondKey);
     }
 
-    const response = wax.encrypt(wallet, buffer, ...(publicKeys as [TPublicKey]));
+    const response = wax.encrypt(wallet, buffer, publicKeyFirstKey, publicKeySecondKey);
 
     return response;
   } finally {

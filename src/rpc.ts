@@ -29,7 +29,7 @@ export type SignBufferRequest = {
   params: {
     buffer: string;
     firstKey: KeyIndex;
-    secondKey?: KeyIndex;
+    secondKey?: KeyIndex | string;
   };
 }
 
@@ -38,7 +38,6 @@ export type DecodeBufferRequest = {
   params: {
     buffer: string;
     firstKey: KeyIndex;
-    secondKey?: KeyIndex;
   };
 }
 
