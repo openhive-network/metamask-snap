@@ -12,6 +12,6 @@ pnpm exec snapper -p "${SNAP_PATH}" --output "${LOG_FILE}"
 
 # Display simplified human-readable report and exit with error code if any issues found
 if [ -f "${LOG_FILE}" ]; then
-  jq -r '.ESLinting[] | "\(.position.filePath):\(.position.lineNum):\n\(.type): \(.description)\n"' "${LOG_FILE}"
+  jq -r 'to_entries[] | .value[] | "\(.position.filePath):\(.position.lineNum):\n\(.type): \(.description)\n"' "${LOG_FILE}"
   exit 1
 fi;

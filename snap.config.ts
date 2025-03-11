@@ -7,9 +7,6 @@ const config: SnapConfig = {
   server: {
     port: 8080
   },
-  experimental: {
-    wasm: true
-  },
   customizeWebpackConfig: webpackConfig => {
     webpackConfig.module = webpackConfig.module ?? {};
     webpackConfig.module.rules = webpackConfig.module.rules ?? [];

@@ -26,7 +26,7 @@ default:
     - corepack enable
     - corepack prepare pnpm@10.0.0 --activate
     - pnpm config set store-dir .pnpm-store
-    - pnpm install
+    - pnpm install --frozen-lockfile
 
 build:
   extends: .npm_based_job
@@ -37,6 +37,7 @@ build:
   artifacts:
     paths:
       - hiveio-metamask-snap-*.tgz
+      - snapper*.log.json
     when: always
     expire_in: 1 week
 
