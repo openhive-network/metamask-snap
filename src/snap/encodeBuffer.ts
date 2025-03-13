@@ -1,6 +1,6 @@
 import type { KeyIndex } from "../rpc";
 import { getWax } from "../hive/wax";
-import { importPrivateKeyToWallet } from "../utils/key-management";
+import { getPublicKeyWifFromKeyIndex, importPrivateKeyToWallet } from "../utils/key-management";
 import { getTempWallet } from "../hive/beekeeper";
 import { ConfirmBufferSign } from "./dialogs/ConfirmBufferSign";
 
@@ -21,7 +21,7 @@ export const encodeBuffer = async (origin: string, buffer: string, firstKey: Key
     if(typeof secondKey === "string")
       publicKeySecondKey = secondKey;
     else if (secondKey)
-      publicKeySecondKey = await importPrivateKeyToWallet(wallet, secondKey);
+      publicKeySecondKey = await getPublicKeyWifFromKeyIndex(secondKey);
 
     const response = wax.encrypt(wallet, buffer, publicKeyFirstKey, publicKeySecondKey);
 
