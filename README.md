@@ -8,11 +8,11 @@ Hive wallet extension allowing you to sign transactions using keys derived from 
 # Clone the repository and its submodules
 git clone --recurse-submodules https://gitlab.syncad.com/hive/metamask-snap.git
 # Install dependencies
-pnpm install
+pnpm install --ignore-scripts
 # Start development server
 pnpm start
 ```
 
-# License
+## License
 
 [MIT License](LICENSE.md)

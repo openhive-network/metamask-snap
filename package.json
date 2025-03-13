@@ -37,6 +37,7 @@
   "devDependencies": {
     "@hiveio/beekeeper": "1.27.10-250304140859",
     "@hiveio/wax": "1.27.6-rc7-250304235913",
+    "@lavamoat/preinstall-always-fail": "^2.0.0",
     "@metamask/key-tree": "^10.0.2",
     "@metamask/snaps-cli": "~6.6.0",
     "@metamask/snaps-sdk": "~6.14.0",

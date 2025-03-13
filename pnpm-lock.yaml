@@ -20,6 +20,9 @@ importers:
       '@hiveio/wax':
         specifier: 1.27.6-rc7-250304235913
         version: 1.27.6-rc7-250304235913
+      '@lavamoat/preinstall-always-fail':
+        specifier: ^2.0.0
+        version: 2.1.0
       '@metamask/key-tree':
         specifier: ^10.0.2
         version: 10.1.0
@@ -817,6 +820,10 @@ packages:
 
   '@jridgewell/trace-mapping@0.3.9':
     resolution: {integrity: sha512-3Belt6tdc8bPgAtbcmdtNJlirVoTmEb5e2gC94PnkwEW9jI6CAHUeoG85tjWP5WquqfavoMtMwiG4P926ZKKuQ==}
+
+  '@lavamoat/preinstall-always-fail@2.1.0':
+    resolution: {integrity: sha512-9xSsxxryPMyBWxfV+Ver7FZhvC1PhE1wDCsYFwsiqZzmeWH8e7Y7gWRFJqPw4M8WNbfeuPhKbLdCK3GsPz9gKg==}
+    engines: {node: ^16.20.0 || ^18.0.0 || ^20.0.0 || ^22.0.0}
 
   '@metamask/abi-utils@3.0.0':
     resolution: {integrity: sha512-a/l0DiSIr7+CBYVpHygUa3ztSlYLFCQMsklLna+t6qmNY9+eIO5TedNxhyIyvaJ+4cN7TLy0NQFbp9FV3X2ktg==}
@@ -5217,6 +5224,8 @@ snapshots:
     dependencies:
       '@jridgewell/resolve-uri': 3.1.2
       '@jridgewell/sourcemap-codec': 1.5.0
+
+  '@lavamoat/preinstall-always-fail@2.1.0': {}
 
   '@metamask/abi-utils@3.0.0':
     dependencies:
