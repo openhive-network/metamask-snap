@@ -27,7 +27,7 @@ export const onRpcRequest = async ({
 
     case 'hive_signTransaction':
       return {
-        signatures: await signTransaction(origin, request.params.transaction, request.params.keys)
+        signatures: await signTransaction(origin, request.params.transaction, request.params.keys, request.params.chainId)
       };
 
     case 'hive_decrypt':

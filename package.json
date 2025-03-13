@@ -1,6 +1,6 @@
 {
   "name": "@hiveio/metamask-snap",
-  "version": "1.2.1",
+  "version": "1.3.1",
   "description": "Hive wallet extension allowing you to sign transactions using keys derived from your Metamask wallet",
   "main": "./dist/bundle.js",
   "files": [

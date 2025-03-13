@@ -5,17 +5,17 @@ import { getTempWallet } from "../hive/beekeeper";
 import { ConfirmTransactionSign } from "./dialogs/ConfirmTransactionSign";
 import type { THexString } from "@hiveio/wax";
 
-export const signTransaction = async (origin: string, transaction: string, keys: KeyIndex[]): Promise<THexString[]> => {
+export const signTransaction = async (origin: string, transaction: string, keys: KeyIndex[], chainId?: string): Promise<THexString[]> => {
   if (keys.length < 1)
     throw new Error('No keys provided');
 
-  const confirmSign = await ConfirmTransactionSign(origin, transaction, keys);
+  const confirmSign = await ConfirmTransactionSign(origin, transaction, keys, chainId);
 
   if(!confirmSign)
-    throw new Error('User denied the transaction');
+    throw new Error('User denied the transaction signing');
 
   // The order is important: First create wax, then transaction and if all success then create wallet
-  const wax = await getWax();
+  const wax = await getWax(chainId);
   const tx = wax.createTransactionFromJson(transaction);
   const wallet = await getTempWallet();
 

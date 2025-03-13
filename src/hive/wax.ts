@@ -1,9 +1,9 @@
-import { createWaxFoundation, type IWaxBaseInterface } from "@hiveio/wax";
+import { createWaxFoundation, DEFAULT_WAX_OPTIONS, type IWaxBaseInterface } from "@hiveio/wax";
 
-let _wax: undefined | IWaxBaseInterface;
-export const getWax = async (): Promise<IWaxBaseInterface> => {
-  if (!_wax)
-    _wax = await createWaxFoundation();
+const waxInstances: Record<string, IWaxBaseInterface> = {};
+export const getWax = async (chainId: string = DEFAULT_WAX_OPTIONS.chainId): Promise<IWaxBaseInterface> => {
+  if (!waxInstances[chainId])
+    waxInstances[chainId] = await createWaxFoundation(chainId !== undefined ? { chainId } : undefined);
 
-  return _wax;
+  return waxInstances[chainId];
 };

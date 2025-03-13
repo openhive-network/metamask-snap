@@ -20,6 +20,7 @@ export type SignTransactionRequest = {
   method: 'hive_signTransaction';
   params: {
     transaction: string;
+    chainId?: string;
     keys: KeyIndex[];
   };
 }

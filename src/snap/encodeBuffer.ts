@@ -8,7 +8,7 @@ export const encodeBuffer = async (origin: string, buffer: string, firstKey: Key
   const confirmDecode = await ConfirmBufferSign(origin, buffer, firstKey, secondKey);
 
   if(!confirmDecode)
-    throw new Error('User denied the buffer decode');
+    throw new Error('User denied the buffer encode');
 
   // The order is important: First create wax, then create wallet
   const wax = await getWax();
