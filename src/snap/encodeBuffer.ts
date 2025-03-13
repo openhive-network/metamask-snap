@@ -1,10 +1,8 @@
 import type { KeyIndex } from "../rpc";
 import { getWax } from "../hive/wax";
-import { remove0x } from "@metamask/utils";
-import { keyIndexToPath } from "../utils/key-management";
+import { importPrivateKeyToWallet } from "../utils/key-management";
 import { getTempWallet } from "../hive/beekeeper";
 import { ConfirmBufferSign } from "./dialogs/ConfirmBufferSign";
-import { SLIP10Node } from "@metamask/key-tree";
 
 export const encodeBuffer = async (origin: string, buffer: string, firstKey: KeyIndex, secondKey?: KeyIndex | string): Promise<string> => {
   const confirmDecode = await ConfirmBufferSign(origin, buffer, firstKey, secondKey);
@@ -17,38 +15,13 @@ export const encodeBuffer = async (origin: string, buffer: string, firstKey: Key
   const wallet = await getTempWallet();
 
   try {
-    const firstKeyBip32 = await snap.request({
-      method: 'snap_getBip32Entropy',
-      params: {
-        curve: "secp256k1",
-        path: keyIndexToPath(firstKey)
-      }
-    });
-    const nodeFirstKey = await SLIP10Node.fromJSON(firstKeyBip32);
-    if (!nodeFirstKey.privateKey)
-      throw new Error('No private key found');
-
-    const wifFirstKey = wax.convertRawPrivateKeyToWif(remove0x(nodeFirstKey.privateKey));
-    const publicKeyFirstKey = await wallet.importKey(wifFirstKey);
+    const publicKeyFirstKey = await importPrivateKeyToWallet(wallet, firstKey);
 
     let publicKeySecondKey: string | undefined;
     if(typeof secondKey === "string")
       publicKeySecondKey = secondKey;
-    else if (secondKey) {
-      const secondKeyBip32 = await snap.request({
-        method: 'snap_getBip32Entropy',
-        params: {
-          curve: "secp256k1",
-          path: keyIndexToPath(secondKey)
-        }
-      });
-      const nodeSecondKey = await SLIP10Node.fromJSON(secondKeyBip32);
-      if (!nodeSecondKey.privateKey)
-        throw new Error('No private key found');
-
-      const wifSecondKey = wax.convertRawPrivateKeyToWif(remove0x(nodeSecondKey.privateKey));
-      publicKeySecondKey = await wallet.importKey(wifSecondKey);
-    }
+    else if (secondKey)
+      publicKeySecondKey = await importPrivateKeyToWallet(wallet, secondKey);
 
     const response = wax.encrypt(wallet, buffer, publicKeyFirstKey, publicKeySecondKey);
 

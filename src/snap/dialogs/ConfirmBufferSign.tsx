@@ -1,5 +1,6 @@
-import { Bold, Copyable, Text, Box, Italic } from "@metamask/snaps-sdk/jsx";
+import { Bold, Copyable, Text, Box } from "@metamask/snaps-sdk/jsx";
 import { KeyIndex } from "../../rpc";
+import { KeyTypeNotice } from "./components/KeyTypeNotice";
 
 export const ConfirmBufferSign = (origin: string, buffer: string, firstKey: KeyIndex, secondKey?: KeyIndex | string) => snap.request({
   method: 'snap_dialog',
@@ -14,14 +15,11 @@ export const ConfirmBufferSign = (origin: string, buffer: string, firstKey: KeyI
         <Text>
           Confirm if you want to sign it using your:
         </Text>
-        <Text>
-          - <Bold>{firstKey.role}</Bold> key (account index: <Italic>#{ String(firstKey.accountIndex ?? 0) }</Italic>)
-        </Text>
+        {KeyTypeNotice(firstKey)}
         <Text>This message will be encrypted for: </Text>
-        { secondKey ? (typeof secondKey === "string" ?
-          <Copyable value={ secondKey }/> :
-          <Text>- <Bold>{secondKey.role}</Bold> key (account index: <Italic>#{ String(secondKey.accountIndex ?? 0) }</Italic>)</Text>
-        ) : <Text>- <Bold>yourself</Bold></Text> }
+        { secondKey && typeof secondKey === "string" && <Copyable value={ secondKey }/> }
+        { secondKey && typeof secondKey === "object" && KeyTypeNotice(secondKey) }
+        { !secondKey && <Text>- <Bold>yourself</Bold></Text> }
       </Box>
     )
   }

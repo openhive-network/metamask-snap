@@ -1,5 +1,6 @@
-import { Bold, Copyable, Text, Box, Italic } from "@metamask/snaps-sdk/jsx";
+import { Bold, Copyable, Text, Box } from "@metamask/snaps-sdk/jsx";
 import type { KeyIndex } from "../../rpc";
+import { KeyTypeNotice } from "./components/KeyTypeNotice";
 
 export const ConfirmBufferDecode = (origin: string, buffer: string, decodeKey: KeyIndex) => snap.request({
   method: 'snap_dialog',
@@ -14,9 +15,7 @@ export const ConfirmBufferDecode = (origin: string, buffer: string, decodeKey: K
         <Text>
           Confirm if you want to sign it using your:
         </Text>
-        <Text>
-          - <Bold>{decodeKey.role}</Bold> key (account index: <Italic>#{ String(decodeKey.accountIndex ?? 0) }</Italic>)
-        </Text>
+        {KeyTypeNotice(decodeKey)}
       </Box>
     )
   }
