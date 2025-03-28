@@ -2,7 +2,7 @@ import type { TPublicKey, TRole } from "@hiveio/wax";
 import type { KeyIndex } from "../rpc";
 import { getWax } from "../hive/wax";
 import { remove0x } from "@metamask/utils";
-import { SLIP10Node } from "@metamask/key-tree";
+import { type BIP44Node, getBIP44AddressKeyDeriver } from "@metamask/key-tree";
 import type { IBeekeeperUnlockedWallet } from "@hiveio/beekeeper";
 
 const KeyIndexToPathMap = {
@@ -12,27 +12,32 @@ const KeyIndexToPathMap = {
   posting: 4
 } as const satisfies Record<TRole, number>;
 
-export const keyIndexToPath = (keyIndex: KeyIndex): string[] => {
+const CoinType = 0xBEE;
+
+export const keyIndexToBip44Node = async(keyIndex: KeyIndex): Promise<BIP44Node> => {
+  const bip44 = await snap.request({
+    method: 'snap_getBip44Entropy',
+    params: {
+      coinType: CoinType
+    }
+  });
+  // Create a function that takes an index and returns an extended private key for m/44'/3054'/accountIndex'/0/address_index
+  const deriveHiveAddress = await getBIP44AddressKeyDeriver(bip44, { account: keyIndex.accountIndex ?? 0, change: 0 });
+
   const keyIndexType = KeyIndexToPathMap[keyIndex.role];
   if (keyIndexType === undefined)
     throw new Error(`Invalid key index type: ${keyIndex.role}`);
 
-  return ["m", "48'", "13'", `${keyIndexType}'`, `${keyIndex.accountIndex ?? 0}'`, "0'"];
+  // Derive the second Hive address, which has a proper index.
+  return await deriveHiveAddress(keyIndexType);
 };
 
 export const getPublicKeyWifFromKeyIndex = async (keyIndex: KeyIndex): Promise<TPublicKey> => {
   const wax = await getWax();
 
-  const bip32 = await snap.request({
-    method: 'snap_getBip32PublicKey',
-    params: {
-      curve: "secp256k1",
-      path: keyIndexToPath(keyIndex),
-      compressed: true
-    }
-  });
+  const bip44Node = await keyIndexToBip44Node(keyIndex);
 
-  const publicKey = wax.convertRawPublicKeyToWif(remove0x(bip32));
+  const publicKey = wax.convertRawPublicKeyToWif(remove0x(bip44Node.compressedPublicKey));
 
   return publicKey;
 };
@@ -40,20 +45,12 @@ export const getPublicKeyWifFromKeyIndex = async (keyIndex: KeyIndex): Promise<T
 export const getPrivateKeyWifFromKeyIndex = async (keyIndex: KeyIndex): Promise<string> => {
   const wax = await getWax();
 
-  const snapResponse = await snap.request({
-    method: 'snap_getBip32Entropy',
-    params: {
-      curve: "secp256k1",
-      path: keyIndexToPath(keyIndex)
-    }
-  });
+  const bip44Node = await keyIndexToBip44Node(keyIndex);
 
-  const node = await SLIP10Node.fromJSON(snapResponse);
-
-  if (!node.privateKey)
+  if (!bip44Node.privateKey)
     throw new Error('No private key found');
 
-  const wif = wax.convertRawPrivateKeyToWif(remove0x(node.privateKey));
+  const wif = wax.convertRawPrivateKeyToWif(remove0x(bip44Node.privateKey));
 
   return wif;
 };
