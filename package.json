@@ -27,7 +27,7 @@
   },
   "type": "commonjs",
   "scripts": {
-    "prebuild": "./scripts/snapper.sh",
+    "prebuild": "husky && ./scripts/snapper.sh",
     "build": "mm-snap build",
     "prepublishOnly": "mm-snap manifest",
     "serve": "mm-snap serve",
@@ -58,6 +58,8 @@
     "eslint-plugin-n": "^17.10.3",
     "eslint-plugin-prettier": "^5.2.1",
     "eslint-plugin-promise": "^7.1.0",
+    "husky": "catalog:husky",
+    "lint-staged": "^15.2.2",
     "typescript": "catalog:typescript-toolset"
   }
 }

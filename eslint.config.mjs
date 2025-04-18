@@ -1,65 +1,78 @@
-import base, { createConfig } from '@metamask/eslint-config';
-import jest from '@metamask/eslint-config-jest';
-import nodejs from '@metamask/eslint-config-nodejs';
-import typescript from '@metamask/eslint-config-typescript';
+import base, { createConfig } from "@metamask/eslint-config";
+import jest from "@metamask/eslint-config-jest";
+import nodejs from "@metamask/eslint-config-nodejs";
+import typescript from "@metamask/eslint-config-typescript";
 
 const config = createConfig([
   {
-    ignores: ['**/dist/', 'node_modules/', 'npm-common-config/'],
+    ignores: ["**/dist/", "node_modules/", "npm-common-config/"]
   },
 
   {
     extends: base,
 
     languageOptions: {
-      sourceType: 'module',
+      sourceType: "module",
       parserOptions: {
         tsconfigRootDir: import.meta.dirname,
-        project: ['./tsconfig.json'],
-      },
+        project: ["./tsconfig.json"]
+      }
     },
 
     settings: {
-      'import-x/extensions': ['.js', '.mjs'],
+      "import-x/extensions": [".js", ".mjs"]
     },
+
+    rules: {
+      "prettier/prettier": [
+        "error",
+        {
+          quoteProps: "as-needed",
+          singleQuote: false,
+          tabWidth: 2,
+          trailingComma: "none"
+        }
+      ]
+    }
   },
 
   {
-    files: ['**/*.ts', '**/*.tsx'],
+    files: ["**/*.ts", "**/*.tsx"],
     extends: typescript,
 
     rules: {
-      'prettier/prettier': [
-        'error',
+      "prettier/prettier": [
+        "error",
         {
-          quoteProps: 'as-needed',
+          quoteProps: "as-needed",
           singleQuote: false,
           tabWidth: 2,
-          trailingComma: 'none',
-        },
+          trailingComma: "none"
+        }
       ],
-      '@typescript-eslint/explicit-function-return-type': 'off',
-      '@typescript-eslint/no-shadow': ['error', { allow: ['Text'] }],
-    },
+      "jsdoc/tag-lines": ["error", "never"],
+      "@typescript-eslint/explicit-function-return-type": "off",
+      "@typescript-eslint/no-shadow": ["error", { allow: ["Text"] }]
+    }
   },
 
   {
-    files: ['**/*.js', '**/*.cjs', 'snap.config.ts'],
+    files: ["**/*.js", "snap.config.ts"],
     extends: nodejs,
 
     languageOptions: {
-      sourceType: 'script',
-    },
+      sourceType: "script"
+    }
   },
 
   {
-    files: ['**/*.test.ts', '**/*.test.tsx', '**/*.test.js'],
+    files: ["**/*.test.ts", "**/*.test.tsx", "**/*.test.js"],
     extends: [jest, nodejs],
 
     rules: {
-      '@typescript-eslint/unbound-method': 'off',
-    },
-  },
+      "@typescript-eslint/unbound-method": "off"
+    }
+  }
 ]);
 
 export default config;
