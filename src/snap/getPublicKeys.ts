@@ -1,10 +1,12 @@
 import type { KeyIndex, PublicKeyData } from "../rpc";
 import { getPublicKeyWifFromKeyIndex } from "../utils/key-management";
 
-export const getPublicKeys = async (keys: KeyIndex[]): Promise<PublicKeyData[]> => {
+export const getPublicKeys = async (
+  keys: KeyIndex[]
+): Promise<PublicKeyData[]> => {
   const publicKeys: PublicKeyData[] = [];
 
-  for(const key of keys) {
+  for (const key of keys) {
     const publicKey = await getPublicKeyWifFromKeyIndex(key);
 
     publicKeys.push({

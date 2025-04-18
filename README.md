@@ -69,6 +69,9 @@ pnpm start
 # Build the Snap
 pnpm build
 
+# Lint the project
+pnpm lint
+
 # Run tests
 pnpm test
 ```

@@ -1,15 +1,21 @@
-import type { KeyIndex } from "../rpc";
-import { getWax } from "../hive/wax";
-import { importPrivateKeyToWallet } from "../utils/key-management";
-import { getTempWallet } from "../hive/beekeeper";
-import { ConfirmBufferDecode } from "./dialogs/ConfirmBufferDecode";
 import type { THexString } from "@hiveio/wax";
 
-export const decodeBuffer = async (origin: string, buffer: THexString, decodeKey: KeyIndex): Promise<string> => {
+import { ConfirmBufferDecode } from "./dialogs/ConfirmBufferDecode";
+import { getTempWallet } from "../hive/beekeeper";
+import { getWax } from "../hive/wax";
+import type { KeyIndex } from "../rpc";
+import { importPrivateKeyToWallet } from "../utils/key-management";
+
+export const decodeBuffer = async (
+  origin: string,
+  buffer: THexString,
+  decodeKey: KeyIndex
+): Promise<string> => {
   const confirmDecode = await ConfirmBufferDecode(origin, buffer, decodeKey);
 
-  if(!confirmDecode)
-    throw new Error('User denied the buffer decode');
+  if (!confirmDecode) {
+    throw new Error("User denied the buffer decode");
+  }
 
   // The order is important: First create wax, then create wallet
   const wax = await getWax();

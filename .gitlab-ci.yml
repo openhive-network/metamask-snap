@@ -1,6 +1,7 @@
 image: node:20.18.3
 
 stages:
+  - .pre
   - build
   - deploy
 
@@ -27,6 +28,12 @@ default:
     - corepack prepare pnpm@10.0.0 --activate
     - pnpm config set store-dir .pnpm-store
     - pnpm install --frozen-lockfile --ignore-scripts # Do not run lifecycle postinstall scripts
+
+lint:
+  extends: .npm_based_job
+  stage: .pre
+  script:
+    - pnpm lint
 
 build:
   extends: .npm_based_job
