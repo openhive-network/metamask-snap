@@ -11,7 +11,8 @@ export const encodeBuffer = async (
   origin: string,
   buffer: string,
   firstKey: KeyIndex,
-  secondKey?: KeyIndex | string
+  secondKey?: KeyIndex | string,
+  nonce?: number
 ): Promise<string> => {
   if (typeof buffer !== "string") {
     throw new Error("Input buffer must be a string");
@@ -49,7 +50,8 @@ export const encodeBuffer = async (
       wallet,
       buffer,
       publicKeyFirstKey,
-      publicKeySecondKey
+      publicKeySecondKey,
+      nonce
     );
 
     return response;

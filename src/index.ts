@@ -53,7 +53,8 @@ export const onRpcRequest = async ({
           origin,
           request.params.buffer,
           request.params.firstKey,
-          request.params.secondKey
+          request.params.secondKey,
+          request.params.nonce
         )
       };
 

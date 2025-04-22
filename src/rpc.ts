@@ -31,6 +31,7 @@ export type SignBufferRequest = {
     buffer: string;
     firstKey: KeyIndex;
     secondKey?: KeyIndex | string;
+    nonce?: number;
   };
 };
 
