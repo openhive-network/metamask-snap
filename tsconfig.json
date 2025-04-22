@@ -20,5 +20,5 @@
     "jsx": "react-jsx",
     "jsxImportSource": "@metamask/snaps-sdk"
   },
-  "include": ["src/**/*.ts", "snap.config.ts", "src/**/*.tsx", "tests/**/*.ts"]
+  "include": ["src/**/*.ts", "snap.config.ts", "src/**/*.tsx", "tests/**/*.ts", "tests/**/*.tsx"]
 }
