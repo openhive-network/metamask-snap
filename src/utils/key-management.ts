@@ -1,3 +1,12 @@
+/**
+ * @file Key management utilities for Hive and WAX
+ * @description This file contains functions to derive keys from BIP44 paths, convert keys to WIF format,
+ * and import keys into a wallet. It uses the @metamask/key-tree library for key derivation and
+ * the @hiveio/wax library for WAX-specific key conversion.
+ *
+ * This the only place where MetaMask BIP44 Snap API is used.
+ */
+
 import type { IBeekeeperUnlockedWallet } from "@hiveio/beekeeper";
 import type { TPublicKey, TRole } from "@hiveio/wax";
 import { type BIP44Node, getBIP44AddressKeyDeriver } from "@metamask/key-tree";
