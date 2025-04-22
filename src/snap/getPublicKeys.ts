@@ -4,6 +4,10 @@ import { getPublicKeyWifFromKeyIndex } from "../utils/key-management";
 export const getPublicKeys = async (
   keys: KeyIndex[]
 ): Promise<PublicKeyData[]> => {
+  if (!Array.isArray(keys)) {
+    throw new Error("keys argument must be an array");
+  }
+
   const publicKeys: PublicKeyData[] = [];
 
   for (const key of keys) {

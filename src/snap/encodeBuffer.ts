@@ -13,6 +13,13 @@ export const encodeBuffer = async (
   firstKey: KeyIndex,
   secondKey?: KeyIndex | string
 ): Promise<string> => {
+  if (typeof buffer !== "string") {
+    throw new Error("Input buffer must be a string");
+  }
+  if (typeof firstKey !== "object") {
+    throw new Error("Key data must be an object");
+  }
+
   const confirmDecode = await ConfirmBufferSign(
     origin,
     buffer,

@@ -11,6 +11,13 @@ export const decodeBuffer = async (
   buffer: THexString,
   decodeKey: KeyIndex
 ): Promise<string> => {
+  if (typeof buffer !== "string") {
+    throw new Error("Input buffer must be a string");
+  }
+  if (typeof decodeKey !== "object") {
+    throw new Error("Key data must be an object");
+  }
+
   const confirmDecode = await ConfirmBufferDecode(origin, buffer, decodeKey);
 
   if (!confirmDecode) {

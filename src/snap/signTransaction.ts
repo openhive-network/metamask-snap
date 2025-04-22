@@ -12,6 +12,12 @@ export const signTransaction = async (
   keys: KeyIndex[],
   chainId?: string
 ): Promise<THexString[]> => {
+  if (typeof transaction !== "string") {
+    throw new Error("Transaction must be a string");
+  }
+  if (!Array.isArray(keys)) {
+    throw new Error("Keys must be an array");
+  }
   if (keys.length < 1) {
     throw new Error("No keys provided");
   }

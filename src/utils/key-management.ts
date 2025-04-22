@@ -24,9 +24,25 @@ const KeyIndexToPathMap = {
 
 const CoinType = 0xbee;
 
-const keyIndexToBip44Node = async (
-  keyIndex: KeyIndex
-): Promise<BIP44Node> => {
+const keyIndexToBip44Node = async (keyIndex: KeyIndex): Promise<BIP44Node> => {
+  if (keyIndex.accountIndex !== undefined && keyIndex.accountIndex < 0) {
+    throw new Error("Key index account index must not be negative");
+  }
+  if (
+    keyIndex.accountIndex !== undefined &&
+    keyIndex.accountIndex > 0xffffffff
+  ) {
+    throw new Error("Key index account index is too large");
+  }
+
+  if (keyIndex.role === undefined) {
+    throw new Error("Key index role is not provided");
+  }
+  const keyIndexType = KeyIndexToPathMap[keyIndex.role];
+  if (keyIndexType === undefined) {
+    throw new Error(`Invalid key index type: ${keyIndex.role}`);
+  }
+
   const bip44 = await snap.request({
     method: "snap_getBip44Entropy",
     params: {
@@ -38,11 +54,6 @@ const keyIndexToBip44Node = async (
     account: keyIndex.accountIndex ?? 0,
     change: 0
   });
-
-  const keyIndexType = KeyIndexToPathMap[keyIndex.role];
-  if (keyIndexType === undefined) {
-    throw new Error(`Invalid key index type: ${keyIndex.role}`);
-  }
 
   // Derive the second Hive address, which has a proper index.
   return await deriveHiveAddress(keyIndexType);
