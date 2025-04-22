@@ -24,7 +24,7 @@ const KeyIndexToPathMap = {
 
 const CoinType = 0xbee;
 
-export const keyIndexToBip44Node = async (
+const keyIndexToBip44Node = async (
   keyIndex: KeyIndex
 ): Promise<BIP44Node> => {
   const bip44 = await snap.request({
@@ -62,7 +62,7 @@ export const getPublicKeyWifFromKeyIndex = async (
   return publicKey;
 };
 
-export const getPrivateKeyWifFromKeyIndex = async (
+const getPrivateKeyWifFromKeyIndex = async (
   keyIndex: KeyIndex
 ): Promise<string> => {
   const wax = await getWax();
