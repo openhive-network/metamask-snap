@@ -4,7 +4,10 @@ import { ConfirmTransactionSign } from "./dialogs/ConfirmTransactionSign";
 import { getTempWallet } from "../hive/beekeeper";
 import { getWax } from "../hive/wax";
 import type { KeyIndex } from "../rpc";
-import { importPrivateKeyToWallet } from "../utils/key-management";
+import {
+  importPrivateKeyToWallet,
+  validateKeyIndexRole
+} from "../utils/key-management";
 
 export const signTransaction = async (
   origin: string,
@@ -20,6 +23,13 @@ export const signTransaction = async (
   }
   if (keys.length < 1) {
     throw new Error("No keys provided");
+  }
+  for (const key of keys) {
+    if (typeof key === "object") {
+      validateKeyIndexRole(key);
+    } else {
+      throw new Error("Key data must be an object");
+    }
   }
 
   const confirmSign = await ConfirmTransactionSign(

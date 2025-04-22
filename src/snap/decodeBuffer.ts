@@ -4,7 +4,10 @@ import { ConfirmBufferDecode } from "./dialogs/ConfirmBufferDecode";
 import { getTempWallet } from "../hive/beekeeper";
 import { getWax } from "../hive/wax";
 import type { KeyIndex } from "../rpc";
-import { importPrivateKeyToWallet } from "../utils/key-management";
+import {
+  importPrivateKeyToWallet,
+  validateKeyIndexRole
+} from "../utils/key-management";
 
 export const decodeBuffer = async (
   origin: string,
@@ -17,6 +20,8 @@ export const decodeBuffer = async (
   if (typeof decodeKey !== "object") {
     throw new Error("Key data must be an object");
   }
+
+  validateKeyIndexRole(decodeKey);
 
   const confirmDecode = await ConfirmBufferDecode(origin, buffer, decodeKey);
 

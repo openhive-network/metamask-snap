@@ -24,7 +24,14 @@ const KeyIndexToPathMap = {
 
 const CoinType = 0xbee;
 
-const keyIndexToBip44Node = async (keyIndex: KeyIndex): Promise<BIP44Node> => {
+export const validateKeyIndexRole = (keyIndex: KeyIndex): void => {
+  if (keyIndex.role === undefined) {
+    throw new Error("Key index role is not provided");
+  }
+  const keyIndexType = KeyIndexToPathMap[keyIndex.role];
+  if (keyIndexType === undefined) {
+    throw new Error(`Invalid key index type: ${keyIndex.role}`);
+  }
   if (keyIndex.accountIndex !== undefined && keyIndex.accountIndex < 0) {
     throw new Error("Key index account index must not be negative");
   }
@@ -34,14 +41,11 @@ const keyIndexToBip44Node = async (keyIndex: KeyIndex): Promise<BIP44Node> => {
   ) {
     throw new Error("Key index account index is too large");
   }
+};
 
-  if (keyIndex.role === undefined) {
-    throw new Error("Key index role is not provided");
-  }
+const keyIndexToBip44Node = async (keyIndex: KeyIndex): Promise<BIP44Node> => {
+  validateKeyIndexRole(keyIndex);
   const keyIndexType = KeyIndexToPathMap[keyIndex.role];
-  if (keyIndexType === undefined) {
-    throw new Error(`Invalid key index type: ${keyIndex.role}`);
-  }
 
   const bip44 = await snap.request({
     method: "snap_getBip44Entropy",

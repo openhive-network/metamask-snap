@@ -4,7 +4,8 @@ import { getWax } from "../hive/wax";
 import type { KeyIndex } from "../rpc";
 import {
   getPublicKeyWifFromKeyIndex,
-  importPrivateKeyToWallet
+  importPrivateKeyToWallet,
+  validateKeyIndexRole
 } from "../utils/key-management";
 
 export const encodeBuffer = async (
@@ -19,6 +20,11 @@ export const encodeBuffer = async (
   }
   if (typeof firstKey !== "object") {
     throw new Error("Key data must be an object");
+  }
+
+  validateKeyIndexRole(firstKey);
+  if (typeof secondKey === "object") {
+    validateKeyIndexRole(firstKey);
   }
 
   const confirmDecode = await ConfirmBufferSign(
