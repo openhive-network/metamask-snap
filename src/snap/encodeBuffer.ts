@@ -6,12 +6,12 @@ import {
 import { ConfirmBufferSign } from "./dialogs/ConfirmBufferSign";
 import { getTempWallet } from "../hive/beekeeper";
 import { getWax } from "../hive/wax";
-import type { KeyIndex } from "../rpc";
 import {
   getPublicKeyWifFromKeyIndex,
   importPrivateKeyToWallet,
   validateKeyIndexRole
-} from "../utils/key-management";
+} from "../priviledged-apis/key-management";
+import type { KeyIndex } from "../rpc";
 
 export const encodeBuffer = async (
   origin: string,

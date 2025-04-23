@@ -7,11 +7,11 @@ import {
 import { ConfirmTransactionSign } from "./dialogs/ConfirmTransactionSign";
 import { getTempWallet } from "../hive/beekeeper";
 import { getWax } from "../hive/wax";
-import type { KeyIndex } from "../rpc";
 import {
   importPrivateKeyToWallet,
   validateKeyIndexRole
-} from "../utils/key-management";
+} from "../priviledged-apis/key-management";
+import type { KeyIndex } from "../rpc";
 
 export const signTransaction = async (
   origin: string,

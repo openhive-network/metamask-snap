@@ -7,11 +7,11 @@ import {
 import { ConfirmBufferDecode } from "./dialogs/ConfirmBufferDecode";
 import { getTempWallet } from "../hive/beekeeper";
 import { getWax } from "../hive/wax";
-import type { KeyIndex } from "../rpc";
 import {
   importPrivateKeyToWallet,
   validateKeyIndexRole
-} from "../utils/key-management";
+} from "../priviledged-apis/key-management";
+import type { KeyIndex } from "../rpc";
 
 export const decodeBuffer = async (
   origin: string,

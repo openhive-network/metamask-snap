@@ -38,7 +38,7 @@ All permissions are used with the principle of least privilege. No private keys 
 │   ├── index.ts           # Main Snap entry point
 │   ├── rpc.ts             # RPC method types
 │   ├── snap/              # RPC method handlers code
-│   └── utils/             # Utility functions
+│   └── priviledged-apis/  # Only part in Snap's code where we use Bip44 entropy functions
 ```
 
 ## Development Setup

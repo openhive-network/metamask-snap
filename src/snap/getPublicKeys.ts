@@ -1,10 +1,10 @@
 import { InvalidInputError } from "@metamask/snaps-sdk";
 
-import type { KeyIndex, PublicKeyData } from "../rpc";
 import {
   getPublicKeyWifFromKeyIndex,
   validateKeyIndexRole
-} from "../utils/key-management";
+} from "../priviledged-apis/key-management";
+import type { KeyIndex, PublicKeyData } from "../rpc";
 
 export const getPublicKeys = async (
   keys: KeyIndex[]
