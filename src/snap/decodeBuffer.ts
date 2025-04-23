@@ -1,6 +1,7 @@
 import type { THexString } from "@hiveio/wax";
 import {
   InvalidInputError,
+  InternalError,
   UserRejectedRequestError
 } from "@metamask/snaps-sdk";
 
@@ -42,9 +43,15 @@ export const decodeBuffer = async (
   try {
     await importPrivateKeyToWallet(wallet, decodeKey);
 
-    const response = wax.decrypt(wallet, buffer);
+    try {
+      const response = wax.decrypt(wallet, buffer);
 
-    return response;
+      return response;
+    } catch (error) {
+      throw new InternalError("Failed to decrypt", {
+        cause: error instanceof Error ? error.message : String(error)
+      }) as Error;
+    }
   } finally {
     wallet.close();
   }

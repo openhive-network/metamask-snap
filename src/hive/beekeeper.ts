@@ -2,6 +2,7 @@ import createBeekeeper, {
   type IBeekeeperUnlockedWallet,
   type IBeekeeperSession
 } from "@hiveio/beekeeper";
+import { InternalError } from "@metamask/snaps-sdk";
 
 let _session: Promise<IBeekeeperSession> | undefined;
 
@@ -22,14 +23,20 @@ const getBeekeeperSession = async (): Promise<IBeekeeperSession> => {
 };
 
 export const getTempWallet = async (): Promise<IBeekeeperUnlockedWallet> => {
-  const session = await getBeekeeperSession();
-  const walletName = `w${Date.now()}`;
-  const array = new Uint32Array(1);
-  globalThis.crypto.getRandomValues(array);
-  const { wallet } = await session.createWallet(
-    walletName,
-    String(array[0]),
-    true
-  );
-  return wallet;
+  try {
+    const session = await getBeekeeperSession();
+    const walletName = `w${Date.now()}`;
+    const array = new Uint32Array(1);
+    globalThis.crypto.getRandomValues(array);
+    const { wallet } = await session.createWallet(
+      walletName,
+      String(array[0]),
+      true
+    );
+    return wallet;
+  } catch (error) {
+    throw new InternalError("Failed to retrieve the beekeeper wallet", {
+      cause: error instanceof Error ? error.message : String(error)
+    }) as Error;
+  }
 };

@@ -1,6 +1,7 @@
-import type { THexString } from "@hiveio/wax";
+import type { ITransaction, THexString } from "@hiveio/wax";
 import {
   InvalidInputError,
+  InternalError,
   UserRejectedRequestError
 } from "@metamask/snaps-sdk";
 
@@ -51,7 +52,14 @@ export const signTransaction = async (
 
   // The order is important: First create wax, then transaction and if all success then create wallet
   const wax = await getWax(chainId);
-  const tx = wax.createTransactionFromJson(transaction);
+  let tx: ITransaction;
+  try {
+    tx = wax.createTransactionFromJson(transaction);
+  } catch (error) {
+    throw new InvalidInputError("Invalid transaction format", {
+      cause: error instanceof Error ? error.message : String(error)
+    }) as Error;
+  }
   const wallet = await getTempWallet();
 
   try {
@@ -60,9 +68,15 @@ export const signTransaction = async (
     for (const key of keys) {
       const publicKey = await importPrivateKeyToWallet(wallet, key);
 
-      const signature = tx.sign(wallet, publicKey);
+      try {
+        const signature = tx.sign(wallet, publicKey);
 
-      signatures.push(signature);
+        signatures.push(signature);
+      } catch (error) {
+        throw new InternalError("Failed to sign transaction", {
+          cause: error instanceof Error ? error.message : String(error)
+        }) as Error;
+      }
     }
 
     return signatures;

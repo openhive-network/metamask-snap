@@ -1,5 +1,6 @@
 import {
   InvalidInputError,
+  InternalError,
   UserRejectedRequestError
 } from "@metamask/snaps-sdk";
 
@@ -59,15 +60,21 @@ export const encodeBuffer = async (
       publicKeySecondKey = await getPublicKeyWifFromKeyIndex(secondKey);
     }
 
-    const response = wax.encrypt(
-      wallet,
-      buffer,
-      publicKeyFirstKey,
-      publicKeySecondKey,
-      nonce
-    );
+    try {
+      const response = wax.encrypt(
+        wallet,
+        buffer,
+        publicKeyFirstKey,
+        publicKeySecondKey,
+        nonce
+      );
 
-    return response;
+      return response;
+    } catch (error) {
+      throw new InternalError("Failed to encrypt", {
+        cause: error instanceof Error ? error.message : String(error)
+      }) as Error;
+    }
   } finally {
     wallet.close();
   }

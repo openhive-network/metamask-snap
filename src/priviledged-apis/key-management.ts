@@ -77,11 +77,17 @@ export const getPublicKeyWifFromKeyIndex = async (
 
   const bip44Node = await keyIndexToBip44Node(keyIndex);
 
-  const publicKey = wax.convertRawPublicKeyToWif(
-    remove0x(bip44Node.compressedPublicKey)
-  );
+  try {
+    const publicKey = wax.convertRawPublicKeyToWif(
+      remove0x(bip44Node.compressedPublicKey)
+    );
 
-  return publicKey;
+    return publicKey;
+  } catch (error) {
+    throw new InternalError("Failed to convert public key to WIF", {
+      cause: error instanceof Error ? error.message : String(error)
+    }) as Error;
+  }
 };
 
 const getPrivateKeyWifFromKeyIndex = async (
@@ -95,9 +101,15 @@ const getPrivateKeyWifFromKeyIndex = async (
     throw new InternalError("No private key found") as Error;
   }
 
-  const wif = wax.convertRawPrivateKeyToWif(remove0x(bip44Node.privateKey));
+  try {
+    const wif = wax.convertRawPrivateKeyToWif(remove0x(bip44Node.privateKey));
 
-  return wif;
+    return wif;
+  } catch (error) {
+    throw new InternalError("Failed to convert private key to WIF", {
+      cause: error instanceof Error ? error.message : String(error)
+    }) as Error;
+  }
 };
 
 export const importPrivateKeyToWallet = async (
@@ -106,7 +118,13 @@ export const importPrivateKeyToWallet = async (
 ): Promise<TPublicKey> => {
   const privateKeyWif = await getPrivateKeyWifFromKeyIndex(keyIndex);
 
-  const publicKey = await wallet.importKey(privateKeyWif);
+  try {
+    const publicKey = await wallet.importKey(privateKeyWif);
 
-  return publicKey;
+    return publicKey;
+  } catch (error) {
+    throw new InternalError("Failed to encrypt", {
+      cause: error instanceof Error ? error.message : String(error)
+    }) as Error;
+  }
 };
