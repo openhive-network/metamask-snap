@@ -1,3 +1,8 @@
+import {
+  InvalidInputError,
+  UserRejectedRequestError
+} from "@metamask/snaps-sdk";
+
 import { ConfirmBufferSign } from "./dialogs/ConfirmBufferSign";
 import { getTempWallet } from "../hive/beekeeper";
 import { getWax } from "../hive/wax";
@@ -16,10 +21,10 @@ export const encodeBuffer = async (
   nonce?: number
 ): Promise<string> => {
   if (typeof buffer !== "string") {
-    throw new Error("Input buffer must be a string");
+    throw new InvalidInputError("Input buffer must be a string") as Error;
   }
   if (typeof firstKey !== "object") {
-    throw new Error("Key data must be an object");
+    throw new InvalidInputError("Key data must be an object") as Error;
   }
 
   validateKeyIndexRole(firstKey);
@@ -35,7 +40,9 @@ export const encodeBuffer = async (
   );
 
   if (!confirmDecode) {
-    throw new Error("User denied the buffer encode");
+    throw new UserRejectedRequestError(
+      "User denied the buffer encode"
+    ) as Error;
   }
 
   // The order is important: First create wax, then create wallet

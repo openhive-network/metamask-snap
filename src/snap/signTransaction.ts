@@ -1,4 +1,8 @@
 import type { THexString } from "@hiveio/wax";
+import {
+  InvalidInputError,
+  UserRejectedRequestError
+} from "@metamask/snaps-sdk";
 
 import { ConfirmTransactionSign } from "./dialogs/ConfirmTransactionSign";
 import { getTempWallet } from "../hive/beekeeper";
@@ -16,19 +20,19 @@ export const signTransaction = async (
   chainId?: string
 ): Promise<THexString[]> => {
   if (typeof transaction !== "string") {
-    throw new Error("Transaction must be a string");
+    throw new InvalidInputError("Transaction must be a string") as Error;
   }
   if (!Array.isArray(keys)) {
-    throw new Error("Keys must be an array");
+    throw new InvalidInputError("Keys must be an array") as Error;
   }
   if (keys.length < 1) {
-    throw new Error("No keys provided");
+    throw new InvalidInputError("No keys provided") as Error;
   }
   for (const key of keys) {
     if (typeof key === "object") {
       validateKeyIndexRole(key);
     } else {
-      throw new Error("Key data must be an object");
+      throw new InvalidInputError("Key data must be an object") as Error;
     }
   }
 
@@ -40,7 +44,9 @@ export const signTransaction = async (
   );
 
   if (!confirmSign) {
-    throw new Error("User denied the transaction signing");
+    throw new UserRejectedRequestError(
+      "User denied the transaction signing"
+    ) as Error;
   }
 
   // The order is important: First create wax, then transaction and if all success then create wallet

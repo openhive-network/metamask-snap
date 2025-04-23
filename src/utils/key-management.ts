@@ -10,6 +10,7 @@
 import type { IBeekeeperUnlockedWallet } from "@hiveio/beekeeper";
 import type { TPublicKey, TRole } from "@hiveio/wax";
 import { type BIP44Node, getBIP44AddressKeyDeriver } from "@metamask/key-tree";
+import { InternalError, InvalidInputError } from "@metamask/snaps-sdk";
 import { remove0x } from "@metamask/utils";
 
 import { getWax } from "../hive/wax";
@@ -26,20 +27,26 @@ const CoinType = 0xbee;
 
 export const validateKeyIndexRole = (keyIndex: KeyIndex): void => {
   if (keyIndex.role === undefined) {
-    throw new Error("Key index role is not provided");
+    throw new InvalidInputError("Key index role is not provided") as Error;
   }
   const keyIndexType = KeyIndexToPathMap[keyIndex.role];
   if (keyIndexType === undefined) {
-    throw new Error(`Invalid key index type: ${keyIndex.role}`);
+    throw new InvalidInputError(
+      `Invalid key index type: ${keyIndex.role}`
+    ) as Error;
   }
   if (keyIndex.accountIndex !== undefined && keyIndex.accountIndex < 0) {
-    throw new Error("Key index account index must not be negative");
+    throw new InvalidInputError(
+      "Key index account index must not be negative"
+    ) as Error;
   }
   if (
     keyIndex.accountIndex !== undefined &&
     keyIndex.accountIndex > 0xffffffff
   ) {
-    throw new Error("Key index account index is too large");
+    throw new InvalidInputError(
+      "Key index account index is too large"
+    ) as Error;
   }
 };
 
@@ -85,7 +92,7 @@ const getPrivateKeyWifFromKeyIndex = async (
   const bip44Node = await keyIndexToBip44Node(keyIndex);
 
   if (!bip44Node.privateKey) {
-    throw new Error("No private key found");
+    throw new InternalError("No private key found") as Error;
   }
 
   const wif = wax.convertRawPrivateKeyToWif(remove0x(bip44Node.privateKey));

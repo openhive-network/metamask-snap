@@ -1,4 +1,8 @@
 import type { THexString } from "@hiveio/wax";
+import {
+  InvalidInputError,
+  UserRejectedRequestError
+} from "@metamask/snaps-sdk";
 
 import { ConfirmBufferDecode } from "./dialogs/ConfirmBufferDecode";
 import { getTempWallet } from "../hive/beekeeper";
@@ -15,10 +19,10 @@ export const decodeBuffer = async (
   decodeKey: KeyIndex
 ): Promise<string> => {
   if (typeof buffer !== "string") {
-    throw new Error("Input buffer must be a string");
+    throw new InvalidInputError("Input buffer must be a string") as Error;
   }
   if (typeof decodeKey !== "object") {
-    throw new Error("Key data must be an object");
+    throw new InvalidInputError("Key data must be an object") as Error;
   }
 
   validateKeyIndexRole(decodeKey);
@@ -26,7 +30,9 @@ export const decodeBuffer = async (
   const confirmDecode = await ConfirmBufferDecode(origin, buffer, decodeKey);
 
   if (!confirmDecode) {
-    throw new Error("User denied the buffer decode");
+    throw new UserRejectedRequestError(
+      "User denied the buffer decode"
+    ) as Error;
   }
 
   // The order is important: First create wax, then create wallet

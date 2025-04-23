@@ -217,7 +217,7 @@ describe("onRpcRequest", () => {
 
       expect(response).toRespondWithError({
         message: "Invalid key index type: invalidrole",
-        code: expect.any(Number),
+        code: -32000,
         stack: expect.any(String)
       });
     });
@@ -235,7 +235,7 @@ describe("onRpcRequest", () => {
       });
       expect(response).toRespondWithError({
         message: "Key index role is not provided",
-        code: expect.any(Number),
+        code: -32000,
         stack: expect.any(String)
       });
     });
@@ -254,7 +254,7 @@ describe("onRpcRequest", () => {
 
       expect(response).toRespondWithError({
         message: "Key index account index is too large",
-        code: expect.any(Number),
+        code: -32000,
         stack: expect.any(String)
       });
     });
@@ -273,7 +273,7 @@ describe("onRpcRequest", () => {
 
       expect(response).toRespondWithError({
         message: "Key index account index must not be negative",
-        code: expect.any(Number),
+        code: -32000,
         stack: expect.any(String)
       });
     });
@@ -290,7 +290,7 @@ describe("onRpcRequest", () => {
 
       expect(response).toRespondWithError({
         message: "keys argument must be an array",
-        code: expect.any(Number),
+        code: -32000,
         stack: expect.any(String)
       });
     });
@@ -309,7 +309,7 @@ describe("onRpcRequest", () => {
 
       expect(response).toRespondWithError({
         message: "keys argument must be an array",
-        code: expect.any(Number),
+        code: -32000,
         stack: expect.any(String)
       });
     });

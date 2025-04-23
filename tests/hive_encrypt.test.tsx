@@ -338,7 +338,7 @@ describe("onRpcRequest", () => {
       });
 
       expect(response).toRespondWithError({
-        code: expect.any(Number),
+        code: -32000,
         message: "Invalid key index type: invalidrole",
         stack: expect.any(String)
       });
@@ -374,7 +374,7 @@ describe("onRpcRequest", () => {
       await ui.ok();
 
       expect(await response).toRespondWithError({
-        code: expect.any(Number),
+        code: -32603,
         message: expect.stringMatching(
           "public key requires STM prefix, but was given `randominvaliddata`"
         ),
@@ -397,7 +397,7 @@ describe("onRpcRequest", () => {
       });
 
       expect(response).toRespondWithError({
-        code: expect.any(Number),
+        code: -32000,
         message: "Input buffer must be a string",
         stack: expect.any(String)
       });
@@ -416,7 +416,7 @@ describe("onRpcRequest", () => {
       });
 
       expect(response).toRespondWithError({
-        code: expect.any(Number),
+        code: -32000,
         message: "Key data must be an object",
         stack: expect.any(String)
       });
@@ -443,7 +443,7 @@ describe("onRpcRequest", () => {
       ).cancel();
 
       expect(await response).toRespondWithError({
-        code: expect.any(Number),
+        code: 4001,
         message: "User denied the buffer encode",
         stack: expect.any(String)
       });

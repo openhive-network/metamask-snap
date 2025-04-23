@@ -1,3 +1,5 @@
+import { InvalidInputError } from "@metamask/snaps-sdk";
+
 import type { KeyIndex, PublicKeyData } from "../rpc";
 import {
   getPublicKeyWifFromKeyIndex,
@@ -8,7 +10,7 @@ export const getPublicKeys = async (
   keys: KeyIndex[]
 ): Promise<PublicKeyData[]> => {
   if (!Array.isArray(keys)) {
-    throw new Error("keys argument must be an array");
+    throw new InvalidInputError("keys argument must be an array") as Error;
   }
 
   const publicKeys: PublicKeyData[] = [];
