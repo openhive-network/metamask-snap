@@ -375,9 +375,12 @@ describe("onRpcRequest", () => {
 
       expect(await response).toRespondWithError({
         code: -32603,
-        message: expect.stringMatching(
-          "public key requires STM prefix, but was given `randominvaliddata`"
-        ),
+        data: {
+          cause: expect.stringContaining(
+            "public key requires STM prefix, but was given `randominvaliddata`"
+          )
+        },
+        message: "Failed to encrypt",
         stack: expect.any(String)
       });
     });
