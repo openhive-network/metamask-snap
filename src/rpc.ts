@@ -25,7 +25,7 @@ export type SignTransactionRequest = {
   };
 };
 
-export type SignBufferRequest = {
+export type EncryptBufferRequest = {
   method: "hive_encrypt";
   params: {
     buffer: string;
@@ -58,7 +58,7 @@ export type SignTransactionResponse = {
 export type RpcRequest =
   | GetPublicKeyRequest
   | SignTransactionRequest
-  | SignBufferRequest
+  | EncryptBufferRequest
   | DecodeBufferRequest;
 export type RpcResponse =
   | GetPublicKeyResponse
