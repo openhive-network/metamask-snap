@@ -1,3 +1,5 @@
+import { MethodNotFoundError } from "@metamask/snaps-sdk";
+
 import type { RpcRequest, RpcResponse } from "./rpc";
 import { decodeBuffer } from "./snap/decodeBuffer";
 import { encodeBuffer } from "./snap/encodeBuffer";
@@ -59,6 +61,6 @@ export const onRpcRequest = async ({
       };
 
     default:
-      throw new Error("Method not found.");
+      throw new MethodNotFoundError() as Error; // Override snapper
   }
 };
