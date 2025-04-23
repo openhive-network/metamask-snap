@@ -57,7 +57,7 @@ All permissions are used with the principle of least privilege. No private keys 
 git clone --recurse-submodules https://gitlab.syncad.com/hive/metamask-snap.git
 
 # Install dependencies
-pnpm install --ignore-scripts
+pnpm install --ignore-scripts --frozen-lockfile
 
 # Start development server
 pnpm start
@@ -76,14 +76,19 @@ pnpm lint
 pnpm test
 ```
 
-## Usage
+## Running
 
 1. Install MetaMask Flask
-2. Connect to the Snap
-3. Approve the requested permissions
-4. Use the Snap to sign Hive transactions
+2. Run `pnpm start`
+3. Connect to the Snap, either:
+    - See the [demo site](https://auth.openhive.network/) and use our official Snap distribution
+    - [Host your own version](https://gitlab.syncad.com/hive/wallet-dapp.git) of the dApp and use `local:http://localhost:8080`
+4. Install Snap using dApp
+5. Approve the requested permissions
+6. Use the Snap to sign Hive transactions, encrypt/decrypt buffers and retrieve your underlying public keys
 
-See the [demo site](https://auth.openhive.network/) for example usage or [host your own version](https://gitlab.syncad.com/hive/wallet-dapp.git).
+> [!TIP]
+> Here is a quick showcase of how to install and use this Snap with the official dApp: [https://www.youtube.com/watch?v=zKT1GXO6G-0](https://www.youtube.com/watch?v=zKT1GXO6G-0)
 
 ## Contributing
 
