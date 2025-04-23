@@ -11,7 +11,10 @@ const getBeekeeperSession = async (): Promise<IBeekeeperSession> => {
       enableLogs: false,
       inMemory: true
     }).then((beekeeper) => {
-      return beekeeper.createSession("salt");
+      const array = new Uint32Array(1);
+      globalThis.crypto.getRandomValues(array);
+
+      return beekeeper.createSession(String(array[0]));
     }));
   }
 
@@ -21,6 +24,12 @@ const getBeekeeperSession = async (): Promise<IBeekeeperSession> => {
 export const getTempWallet = async (): Promise<IBeekeeperUnlockedWallet> => {
   const session = await getBeekeeperSession();
   const walletName = `w${Date.now()}`;
-  const { wallet } = await session.createWallet(walletName, "pass", true);
+  const array = new Uint32Array(1);
+  globalThis.crypto.getRandomValues(array);
+  const { wallet } = await session.createWallet(
+    walletName,
+    String(array[0]),
+    true
+  );
   return wallet;
 };
