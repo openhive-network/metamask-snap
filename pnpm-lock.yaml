@@ -19,11 +19,11 @@ importers:
   .:
     devDependencies:
       '@hiveio/beekeeper':
-        specifier: 1.27.10-250304140859
-        version: 1.27.10-250304140859
+        specifier: 1.27.11-stable.250425192022
+        version: 1.27.11-stable.250425192022
       '@hiveio/wax':
-        specifier: 1.27.6-rc7-250314161617
-        version: 1.27.6-rc7-250314161617
+        specifier: 1.27.6-rc7-stable.250416082029
+        version: 1.27.6-rc7-stable.250416082029
       '@jest/globals':
         specifier: ^29.7.0
         version: 29.7.0
@@ -800,16 +800,16 @@ packages:
     resolution: {integrity: sha512-XBEKsYqLGXLah9PNJbgdkigthkG7TAGvlD/sH12beMXEyHDyigfcbdvHhmLyDWgDyOJn4QwiQUaF7yeuhnjdog==}
     engines: {node: '>=18'}
 
-  '@hiveio/beekeeper@1.27.10-250304140859':
-    resolution: {integrity: sha1-ZD+9hyove95FEFw7ftqGntx7Ma8=, tarball: https://gitlab.syncad.com/api/v4/projects/198/packages/npm/@hiveio/beekeeper/-/@hiveio/beekeeper-1.27.10-250304140859.tgz}
-    engines: {node: ^20.11 || >= 21.2}
-
   '@hiveio/beekeeper@1.27.10-stable.250305202831':
     resolution: {integrity: sha1-mPx0QrDh3NSPSOYGyR1SUyi3lyA=, tarball: https://gitlab.syncad.com/api/v4/projects/198/packages/npm/@hiveio/beekeeper/-/@hiveio/beekeeper-1.27.10-stable.250305202831.tgz}
     engines: {node: ^20.11 || >= 21.2}
 
-  '@hiveio/wax@1.27.6-rc7-250314161617':
-    resolution: {integrity: sha1-cFrsq3vl6M18v4dhbfYScUj00p0=, tarball: https://gitlab.syncad.com/api/v4/projects/419/packages/npm/@hiveio/wax/-/@hiveio/wax-1.27.6-rc7-250314161617.tgz}
+  '@hiveio/beekeeper@1.27.11-stable.250425192022':
+    resolution: {integrity: sha1-/GpUvBZtm6+PDttDGBEqA6iWWsE=, tarball: https://gitlab.syncad.com/api/v4/projects/198/packages/npm/@hiveio/beekeeper/-/@hiveio/beekeeper-1.27.11-stable.250425192022.tgz}
+    engines: {node: ^20.11 || >= 21.2}
+
+  '@hiveio/wax@1.27.6-rc7-stable.250416082029':
+    resolution: {integrity: sha1-qajRtbYMAhxFI5DHEl1Niwxg6iU=, tarball: https://gitlab.syncad.com/api/v4/projects/419/packages/npm/@hiveio/wax/-/@hiveio/wax-1.27.6-rc7-stable.250416082029.tgz}
     engines: {node: ^20.11 || >= 21.2}
 
   '@humanfs/core@0.19.1':
@@ -5825,11 +5825,11 @@ snapshots:
       '@ethereumjs/rlp': 5.0.2
       ethereum-cryptography: 2.2.1
 
-  '@hiveio/beekeeper@1.27.10-250304140859': {}
-
   '@hiveio/beekeeper@1.27.10-stable.250305202831': {}
 
-  '@hiveio/wax@1.27.6-rc7-250314161617':
+  '@hiveio/beekeeper@1.27.11-stable.250425192022': {}
+
+  '@hiveio/wax@1.27.6-rc7-stable.250416082029':
     dependencies:
       '@hiveio/beekeeper': 1.27.10-stable.250305202831
       events: 3.3.0
