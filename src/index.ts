@@ -1,10 +1,12 @@
-import type { RpcRequest, RpcResponse } from './rpc';
-import { decodeBuffer } from './snap/decodeBuffer';
-import { encodeBuffer } from './snap/encodeBuffer';
-import { getPublicKeys } from './snap/getPublicKeys';
-import { signTransaction } from './snap/signTransaction';
+import { MethodNotFoundError } from "@metamask/snaps-sdk";
 
-export type * from './rpc';
+import type { RpcRequest, RpcResponse } from "./rpc";
+import { decodeBuffer } from "./snap/decodeBuffer";
+import { encodeBuffer } from "./snap/encodeBuffer";
+import { getPublicKeys } from "./snap/getPublicKeys";
+import { signTransaction } from "./snap/signTransaction";
+
+export type * from "./rpc";
 
 /**
  * Handle incoming JSON-RPC requests, sent through `wallet_invokeSnap`.
@@ -17,30 +19,48 @@ export type * from './rpc';
  */
 export const onRpcRequest = async ({
   origin,
-  request,
-}: { origin: string; request: RpcRequest }): Promise<RpcResponse> => {
+  request
+}: {
+  origin: string;
+  request: RpcRequest;
+}): Promise<RpcResponse> => {
   switch (request.method) {
-    case 'hive_getPublicKeys':
+    case "hive_getPublicKeys":
       return {
         publicKeys: await getPublicKeys(request.params.keys)
       };
 
-    case 'hive_signTransaction':
+    case "hive_signTransaction":
       return {
-        signatures: await signTransaction(origin, request.params.transaction, request.params.keys, request.params.chainId)
+        signatures: await signTransaction(
+          origin,
+          request.params.transaction,
+          request.params.keys,
+          request.params.chainId
+        )
       };
 
-    case 'hive_decrypt':
+    case "hive_decrypt":
       return {
-        buffer: await decodeBuffer(origin, request.params.buffer, request.params.firstKey)
+        buffer: await decodeBuffer(
+          origin,
+          request.params.buffer,
+          request.params.firstKey
+        )
       };
 
-    case 'hive_encrypt':
+    case "hive_encrypt":
       return {
-        buffer: await encodeBuffer(origin, request.params.buffer, request.params.firstKey, request.params.secondKey)
+        buffer: await encodeBuffer(
+          origin,
+          request.params.buffer,
+          request.params.firstKey,
+          request.params.secondKey,
+          request.params.nonce
+        )
       };
 
     default:
-      throw new Error('Method not found.');
+      throw new MethodNotFoundError() as Error; // Override snapper
   }
 };

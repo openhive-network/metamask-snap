@@ -1,19 +1,42 @@
-import createBeekeeper, { type IBeekeeperUnlockedWallet, type IBeekeeperInstance, type IBeekeeperSession } from "@hiveio/beekeeper";
+import createBeekeeper, {
+  type IBeekeeperUnlockedWallet,
+  type IBeekeeperSession
+} from "@hiveio/beekeeper";
+import { InternalError } from "@metamask/snaps-sdk";
 
-let _beekeeper: undefined | IBeekeeperInstance;
-let _session: undefined | IBeekeeperSession;
+let _session: Promise<IBeekeeperSession> | undefined;
+
 const getBeekeeperSession = async (): Promise<IBeekeeperSession> => {
-  if (!_beekeeper || !_session) {
-    _beekeeper = await createBeekeeper({ enableLogs: false, inMemory: true });
-    _session = _beekeeper.createSession("salt");
+  if (!_session) {
+    return (_session = createBeekeeper({
+      enableLogs: false,
+      inMemory: true
+    }).then((beekeeper) => {
+      const array = new Uint32Array(1);
+      globalThis.crypto.getRandomValues(array);
+
+      return beekeeper.createSession(String(array[0]));
+    }));
   }
 
   return _session;
 };
 
 export const getTempWallet = async (): Promise<IBeekeeperUnlockedWallet> => {
-  const session = await getBeekeeperSession();
-  const walletName = "w" + Date.now();
-  const { wallet } = await session.createWallet(walletName, "pass", true);
-  return wallet;
+  try {
+    const session = await getBeekeeperSession();
+    const walletName = `w${Date.now()}`;
+    const array = new Uint32Array(1);
+    globalThis.crypto.getRandomValues(array);
+    const { wallet } = await session.createWallet(
+      walletName,
+      String(array[0]),
+      true
+    );
+    return wallet;
+  } catch (error) {
+    throw new InternalError("Failed to retrieve the beekeeper wallet", {
+      cause: error instanceof Error ? error.message : String(error)
+    }) as Error;
+  }
 };

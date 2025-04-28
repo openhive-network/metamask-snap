@@ -1,0 +1,269 @@
+{
+  "openrpc": "1.2.1",
+  "info": {
+    "title": "Hive Wallet MetaMask Snap API",
+    "description": "API for interacting with the Hive blockchain through MetaMask",
+    "version": "1.0.0",
+    "license": {
+      "name": "MIT"
+    }
+  },
+  "methods": [
+    {
+      "name": "hive_getPublicKeys",
+      "description": "Retrieves Hive public keys derived from the MetaMask wallet for specified roles and account indices.",
+      "paramStructure": "by-name",
+      "params": [
+        {
+          "name": "keys",
+          "description": "Array of key specifications defining which keys to retrieve",
+          "required": true,
+          "schema": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "accountIndex": {
+                  "type": "number",
+                  "description": "HD wallet account index (defaults to 0 if not specified)",
+                  "default": 0
+                },
+                "role": {
+                  "type": "string",
+                  "description": "Hive key role (posting, active, owner, memo)",
+                  "enum": ["posting", "active", "owner", "memo"]
+                }
+              },
+              "required": ["role"]
+            }
+          }
+        }
+      ],
+      "result": {
+        "name": "getPublicKeysResult",
+        "description": "Object containing the derived public keys",
+        "schema": {
+          "type": "object",
+          "properties": {
+            "publicKeys": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "accountIndex": {
+                    "type": "number",
+                    "description": "The HD wallet account index used"
+                  },
+                  "role": {
+                    "type": "string",
+                    "description": "The Hive key role"
+                  },
+                  "publicKey": {
+                    "type": "string",
+                    "description": "The derived Hive public key"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "hive_signTransaction",
+      "description": "Signs a Hive transaction using keys derived from the MetaMask wallet.",
+      "paramStructure": "by-name",
+      "params": [
+        {
+          "name": "transaction",
+          "description": "Serialized Hive transaction (JSON string)",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "keys",
+          "description": "Array of key specifications to use for signing",
+          "required": true,
+          "schema": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "accountIndex": {
+                  "type": "number",
+                  "description": "HD wallet account index (defaults to 0 if not specified)",
+                  "default": 0
+                },
+                "role": {
+                  "type": "string",
+                  "description": "Hive key role (posting, active, owner, memo)",
+                  "enum": ["posting", "active", "owner", "memo"]
+                }
+              },
+              "required": ["role"]
+            }
+          }
+        },
+        {
+          "name": "chainId",
+          "description": "Optional Hive blockchain ID",
+          "required": false,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "result": {
+        "name": "signTransactionResult",
+        "description": "Object containing transaction signatures",
+        "schema": {
+          "type": "object",
+          "properties": {
+            "signatures": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "description": "Hex-encoded transaction signature"
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "hive_encrypt",
+      "description": "Encrypts a buffer using Hive keys derived from the MetaMask wallet.",
+      "paramStructure": "by-name",
+      "params": [
+        {
+          "name": "buffer",
+          "description": "String data to encrypt",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "firstKey",
+          "description": "Key specification for the first encryption key",
+          "required": true,
+          "schema": {
+            "type": "object",
+            "properties": {
+              "accountIndex": {
+                "type": "number",
+                "description": "HD wallet account index (defaults to 0 if not specified)",
+                "default": 0
+              },
+              "role": {
+                "type": "string",
+                "description": "Hive key role (posting, active, owner, memo)",
+                "enum": ["posting", "active", "owner", "memo"]
+              }
+            },
+            "required": ["role"]
+          }
+        },
+        {
+          "name": "secondKey",
+          "description": "Second key for encryption (either KeyIndex object or a public key string)",
+          "required": false,
+          "schema": {
+            "oneOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "accountIndex": {
+                    "type": "number",
+                    "default": 0
+                  },
+                  "role": {
+                    "type": "string",
+                    "enum": ["posting", "active", "owner", "memo"]
+                  }
+                },
+                "required": ["role"]
+              },
+              {
+                "type": "string",
+                "description": "Public key string"
+              }
+            ]
+          }
+        },
+        {
+          "name": "nonce",
+          "description": "Optional nonce value for encryption",
+          "required": false,
+          "schema": {
+            "type": "number"
+          }
+        }
+      ],
+      "result": {
+        "name": "encryptResult",
+        "description": "Object containing the encrypted buffer",
+        "schema": {
+          "type": "object",
+          "properties": {
+            "buffer": {
+              "type": "string",
+              "description": "Encrypted data"
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "hive_decrypt",
+      "description": "Decrypts a buffer using a Hive key derived from the MetaMask wallet.",
+      "paramStructure": "by-name",
+      "params": [
+        {
+          "name": "buffer",
+          "description": "Encrypted string data to decrypt",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "firstKey",
+          "description": "Key specification for decryption",
+          "required": true,
+          "schema": {
+            "type": "object",
+            "properties": {
+              "accountIndex": {
+                "type": "number",
+                "description": "HD wallet account index (defaults to 0 if not specified)",
+                "default": 0
+              },
+              "role": {
+                "type": "string",
+                "description": "Hive key role (posting, active, owner, memo)",
+                "enum": ["posting", "active", "owner", "memo"]
+              }
+            },
+            "required": ["role"]
+          }
+        }
+      ],
+      "result": {
+        "name": "decryptResult",
+        "description": "Object containing the decrypted buffer",
+        "schema": {
+          "type": "object",
+          "properties": {
+            "buffer": {
+              "type": "string",
+              "description": "Decrypted data"
+            }
+          }
+        }
+      }
+    }
+  ]
+}
