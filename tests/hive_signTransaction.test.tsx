@@ -190,7 +190,7 @@ describe("onRpcRequest", () => {
               accountIndex: 0
             },
             {
-              role: "posting",
+              role: "active",
               accountIndex: 1
             }
           ]
@@ -205,7 +205,7 @@ describe("onRpcRequest", () => {
       expect(result).toRespondWith({
         signatures: [
           "1f35cc002f32ef076dd7c7bdb6e47b43962bb769f8b7c5bee4735f259c2aa753e35bcaec87129b94a25d4f37f04560fecb0c212af37234cc61a87473dcedb7114f",
-          "1f7d786a8608182916720d319b1409a27581e26616356760b3f3af5a8409b38b2f14b01716d588bc812b5995c353d66b59ae3557c34eff523ba39315fb6676acb1"
+          "1fc488f9f904b4f53b4ed529f662fd7db382c22dbcddb6e887dd6ad9976a8557937147fb1fe7f413e2ab0da3cbc763eb96ae8f44dd453d71b6c8c14a6e0b21b59b"
         ]
       });
     });

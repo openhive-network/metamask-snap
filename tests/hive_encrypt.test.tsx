@@ -152,7 +152,8 @@ describe("onRpcRequest", () => {
 
       const role = "memo";
       const accountIndex = 0;
-      const secondKey = "STM65wH1LZ7BfSHcK69SShnqCAH5xdoSZpGkUjmzHJ5GCuxEK9V5G";
+      // private key: 5KRSDQEeNsLdSBKqxLEB98BvEMkw9gAEHKj4Grvd92agWN6Hq1B
+      const secondKey = "STM8LYDC8gWEtsdFvm4gzRmcsJnmuhCMcpL7vxpXPh6pGUZxE9WhY";
 
       const origin = "Jest";
       const response = request({
@@ -184,7 +185,7 @@ describe("onRpcRequest", () => {
 
       expect(await response).toRespondWith({
         buffer:
-          "#11111111DLETzZyirVfcLmtTjsjHEqrRUFF2Fr8QGygDz5SvcTh91G1e1tZGWF3pHtRcVVqtTbnM4KWYeYrEi1E2coKsLLvNb6oiF4664Q3HGRegqkvtqxHZWEg8bpA"
+          "#111111114qbL26LTwSqQg3VtKqyb2gdS3dmmzUGGfKj97AfZNRspcFEEBFMG8ktypL9c8rj2rAZASs6LLo4e1cD1boDqeDsCZDPcC3kUk4tQvgZTLgtKGVhwyRamuPK"
       });
     });
 
@@ -228,6 +229,49 @@ describe("onRpcRequest", () => {
       expect(await response).toRespondWith({
         buffer:
           "#111111117yqGc5E9CHFw1Q7NPiUJfgUZw1RLs4DhqjZhf5G7es6CQPreDvoTfQCjmyVx9HpkFsZSofjZsxLTULuhPqUZMq1kXCfBRfDabrLrzmqwWH6YM7sSC42uDuA"
+      });
+    });
+
+    it("should successfully encode buffer with a non-default role (posting)", async () => {
+      const { request } = await installSnap();
+
+      const buffer = "Hello world";
+
+      const role = "posting";
+      const accountIndex = 0;
+
+      const origin = "Jest";
+      const response = request({
+        origin,
+        method: "hive_encrypt",
+        params: {
+          buffer,
+          firstKey: {
+            role,
+            accountIndex
+          },
+          nonce: 0
+        }
+      });
+
+      const ui = (await response.getInterface()) as SnapConfirmationInterface;
+      expect(ui.type).toBe("confirmation");
+      const props = ui.content.props as any;
+      expect(props.children[0].props.children[0].props.children).toBe(origin);
+      expect(props.children[1].props.value).toBe(buffer);
+      expect(props.children[3][0].props.children[1].props.children).toBe(role);
+      expect(props.children[3][0].props.children[4].props.children[1]).toBe(
+        String(accountIndex)
+      );
+      expect(props.children[7].props.children[1].props.children).toBe(
+        "yourself"
+      );
+
+      await ui.ok();
+
+      expect(await response).toRespondWith({
+        buffer:
+          "#11111111N5UZWjwf2UzcJsMQMWhdtEFgYNX3qWVNhc7jyMxv1yDNEQDMDQSCJ3EczvTieskoKVsf4GPVjupcvhRhXaeC3eUmsgRF6CAxvzPpQ6AyqHqZX2HfZr3GDDY"
       });
     });
 
