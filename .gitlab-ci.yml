@@ -68,6 +68,9 @@ test:
 publish_dev_package:
   extends: .npm_based_job
   stage: deploy
+  only:
+    refs:
+      - main
   variables:
     REGISTRY_URL: "gitlab.syncad.com/api/v4/projects/${CI_PROJECT_ID}/packages/npm/"
     PUBLISH_TOKEN: "${CI_JOB_TOKEN}"
@@ -83,6 +86,9 @@ publish_dev_package:
 publish_npmjs_package:
   extends: .npm_based_job
   stage: deploy
+  only:
+    refs:
+      - main
   variables:
     REGISTRY_URL: "registry.npmjs.org/"
     PUBLISH_TOKEN: "${INTERNAL_HIDDEN_PUBLISH_TOKEN}"
