@@ -33,14 +33,14 @@ export const encodeBuffer = async (
     validateKeyIndexRole(secondKey);
   }
 
-  const confirmDecode = await ConfirmBufferSign(
+  const confirmEncode = await ConfirmBufferSign(
     origin,
     buffer,
     firstKey,
     secondKey
   );
 
-  if (!confirmDecode) {
+  if (!confirmEncode) {
     throw new UserRejectedRequestError(
       "User denied the buffer encode"
     ) as Error;
