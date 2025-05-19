@@ -13,7 +13,7 @@ export const getWax = async (
     return (waxInstances[chainId] = createWaxFoundation(
       chainId === undefined ? undefined : { chainId }
     )).catch((error) => {
-      throw new InternalError("Failed to encrypt", {
+      throw new InternalError("Failed to initialize wax foundation", {
         cause: error instanceof Error ? error.message : String(error)
       }) as Error;
     });

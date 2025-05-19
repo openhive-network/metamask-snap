@@ -16,7 +16,11 @@ const getBeekeeperSession = async (): Promise<IBeekeeperSession> => {
       globalThis.crypto.getRandomValues(array);
 
       return beekeeper.createSession(String(array[0]));
-    }));
+    })).catch((error) => {
+      throw new InternalError("Failed to initialize beekeeper session", {
+        cause: error instanceof Error ? error.message : String(error)
+      }) as Error;
+    });
   }
 
   return _session;
