@@ -30,7 +30,7 @@ export const encodeBuffer = async (
 
   validateKeyIndexRole(firstKey);
   if (typeof secondKey === "object") {
-    validateKeyIndexRole(firstKey);
+    validateKeyIndexRole(secondKey);
   }
 
   const confirmDecode = await ConfirmBufferSign(

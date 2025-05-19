@@ -7,7 +7,7 @@
     "url": "git+https://gitlab.syncad.com/hive/metamask-snap.git"
   },
   "source": {
-    "shasum": "4SgYNgw8yiew9kk3IQstpxU9iPQG18338zWpvGgorMk=",
+    "shasum": "tjetIPSc0ov3QGtKDoMV6AYIDL2D91cL6E10W0b0JZg=",
     "location": {
       "npm": {
         "filePath": "dist/bundle.js",
