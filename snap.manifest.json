@@ -7,7 +7,7 @@
     "url": "git+https://gitlab.syncad.com/hive/metamask-snap.git"
   },
   "source": {
-    "shasum": "tjetIPSc0ov3QGtKDoMV6AYIDL2D91cL6E10W0b0JZg=",
+    "shasum": "y3BT62cuaOpaXZLgvbEQMr5Fs2pVPYyohjVZxERBcto=",
     "location": {
       "npm": {
         "filePath": "dist/bundle.js",
@@ -24,6 +24,12 @@
       "snaps": false
     },
     "endowment:webassembly": {},
+    "snap_getBip32PublicKey": [
+      {
+        "path": ["m", "44'", "3054'"],
+        "curve": "secp256k1"
+      }
+    ],
     "snap_getBip44Entropy": [
       {
         "coinType": 3054

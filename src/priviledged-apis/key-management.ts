@@ -70,24 +70,32 @@ const keyIndexToBip44Node = async (keyIndex: KeyIndex): Promise<BIP44Node> => {
   return await deriveHiveAddress(keyIndexType);
 };
 
-export const getPublicKeyWifFromKeyIndex = async (
+export const keyIndexToPublicKey = async (
   keyIndex: KeyIndex
-): Promise<TPublicKey> => {
+): Promise<string> => {
+  validateKeyIndexRole(keyIndex);
+  const keyIndexType = KeyIndexToPathMap[keyIndex.role];
+
+  const publicKey = await snap.request({
+    method: "snap_getBip32PublicKey",
+    params: {
+      path: [
+        "m",
+        "44'",
+        `${CoinType}'`,
+        `${keyIndex.accountIndex ?? 0}'`,
+        "0",
+        `${keyIndexType}`
+      ],
+      curve: "secp256k1",
+      compressed: true
+    }
+  });
+
   const wax = await getWax();
+  const waxPublicKey = wax.convertRawPublicKeyToWif(remove0x(publicKey));
 
-  const bip44Node = await keyIndexToBip44Node(keyIndex);
-
-  try {
-    const publicKey = wax.convertRawPublicKeyToWif(
-      remove0x(bip44Node.compressedPublicKey)
-    );
-
-    return publicKey;
-  } catch (error) {
-    throw new InternalError("Failed to convert public key to WIF", {
-      cause: error instanceof Error ? error.message : String(error)
-    }) as Error;
-  }
+  return waxPublicKey;
 };
 
 const getPrivateKeyWifFromKeyIndex = async (

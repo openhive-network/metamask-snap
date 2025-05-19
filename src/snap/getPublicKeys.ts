@@ -1,7 +1,7 @@
 import { InvalidInputError } from "@metamask/snaps-sdk";
 
 import {
-  getPublicKeyWifFromKeyIndex,
+  keyIndexToPublicKey,
   validateKeyIndexRole
 } from "../priviledged-apis/key-management";
 import type { KeyIndex, PublicKeyData } from "../rpc";
@@ -18,7 +18,7 @@ export const getPublicKeys = async (
   for (const key of keys) {
     validateKeyIndexRole(key);
 
-    const publicKey = await getPublicKeyWifFromKeyIndex(key);
+    const publicKey = await keyIndexToPublicKey(key);
 
     publicKeys.push({
       accountIndex: key.accountIndex ?? 0,

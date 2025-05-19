@@ -8,7 +8,7 @@ import { ConfirmBufferSign } from "./dialogs/ConfirmBufferSign";
 import { getTempWallet } from "../hive/beekeeper";
 import { getWax } from "../hive/wax";
 import {
-  getPublicKeyWifFromKeyIndex,
+  keyIndexToPublicKey,
   importPrivateKeyToWallet,
   validateKeyIndexRole
 } from "../priviledged-apis/key-management";
@@ -57,7 +57,7 @@ export const encodeBuffer = async (
     if (typeof secondKey === "string") {
       publicKeySecondKey = secondKey;
     } else if (secondKey) {
-      publicKeySecondKey = await getPublicKeyWifFromKeyIndex(secondKey);
+      publicKeySecondKey = await keyIndexToPublicKey(secondKey);
     }
 
     try {
