@@ -9,7 +9,7 @@
 
 import type { IBeekeeperUnlockedWallet } from "@hiveio/beekeeper";
 import type { TPublicKey, TRole } from "@hiveio/wax";
-import { type BIP44Node, getBIP44AddressKeyDeriver } from "@metamask/key-tree";
+import { getBIP44AddressKeyDeriver } from "@metamask/key-tree";
 import { InternalError, InvalidInputError } from "@metamask/snaps-sdk";
 import { remove0x } from "@metamask/utils";
 
@@ -50,26 +50,6 @@ export const validateKeyIndexRole = (keyIndex: KeyIndex): void => {
   }
 };
 
-const keyIndexToBip44Node = async (keyIndex: KeyIndex): Promise<BIP44Node> => {
-  validateKeyIndexRole(keyIndex);
-  const keyIndexType = KeyIndexToPathMap[keyIndex.role];
-
-  const bip44 = await snap.request({
-    method: "snap_getBip44Entropy",
-    params: {
-      coinType: CoinType
-    }
-  });
-  // Create a function that takes an index and returns an extended private key for m/44'/3054'/accountIndex'/0/address_index
-  const deriveHiveAddress = await getBIP44AddressKeyDeriver(bip44, {
-    account: keyIndex.accountIndex ?? 0,
-    change: 0
-  });
-
-  // Derive the second Hive address, which has a proper index.
-  return await deriveHiveAddress(keyIndexType);
-};
-
 export const keyIndexToPublicKey = async (
   keyIndex: KeyIndex
 ): Promise<string> => {
@@ -98,34 +78,46 @@ export const keyIndexToPublicKey = async (
   return waxPublicKey;
 };
 
-const getPrivateKeyWifFromKeyIndex = async (
+export const importPrivateKeyToWallet = async (
+  wallet: IBeekeeperUnlockedWallet,
   keyIndex: KeyIndex
-): Promise<string> => {
-  const wax = await getWax();
+): Promise<TPublicKey> => {
+  validateKeyIndexRole(keyIndex);
+  const keyIndexType = KeyIndexToPathMap[keyIndex.role];
 
-  const bip44Node = await keyIndexToBip44Node(keyIndex);
+  const bip44 = await snap.request({
+    method: "snap_getBip44Entropy",
+    params: {
+      coinType: CoinType
+    }
+  });
 
+  // Create a function that takes an index and returns an extended private key for m/44'/3054'/accountIndex'/0/address_index
+  const deriveHiveAddress = await getBIP44AddressKeyDeriver(bip44, {
+    account: keyIndex.accountIndex ?? 0,
+    change: 0
+  });
+  // Derive the second Hive address, which has a proper index.
+  const bip44Node = await deriveHiveAddress(keyIndexType);
   if (!bip44Node.privateKey) {
     throw new InternalError("No private key found") as Error;
   }
 
-  try {
-    const wif = wax.convertRawPrivateKeyToWif(remove0x(bip44Node.privateKey));
+  const wax = await getWax();
 
-    return wif;
+  // Try to convert the private key to WIF format
+  let privateKeyWif: string;
+  try {
+    privateKeyWif = wax.convertRawPrivateKeyToWif(
+      remove0x(bip44Node.privateKey)
+    );
   } catch (error) {
     throw new InternalError("Failed to convert private key to WIF", {
       cause: error instanceof Error ? error.message : String(error)
     }) as Error;
   }
-};
 
-export const importPrivateKeyToWallet = async (
-  wallet: IBeekeeperUnlockedWallet,
-  keyIndex: KeyIndex
-): Promise<TPublicKey> => {
-  const privateKeyWif = await getPrivateKeyWifFromKeyIndex(keyIndex);
-
+  // Try to import the private key into the wallet in order to sign the transaction or buffer using Hive Beekeeper interface
   try {
     const publicKey = await wallet.importKey(privateKeyWif);
 
