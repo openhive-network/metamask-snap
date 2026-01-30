@@ -10,7 +10,7 @@ import { getTempWallet } from "../hive/beekeeper";
 import { getWax } from "../hive/wax";
 import {
   importPrivateKeyToWallet,
-  validateKeyIndexRole
+  validateKeyIndex
 } from "../priviledged-apis/key-management";
 import type { KeyIndex } from "../rpc";
 
@@ -26,7 +26,7 @@ export const decodeBuffer = async (
     throw new InvalidInputError("Key data must be an object") as Error;
   }
 
-  validateKeyIndexRole(decodeKey);
+  validateKeyIndex(decodeKey);
 
   const confirmDecode = await ConfirmBufferDecode(origin, buffer, decodeKey);
 

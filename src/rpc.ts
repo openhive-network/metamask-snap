@@ -2,11 +2,15 @@ import type { THexString, TPublicKey, TRole } from "@hiveio/wax";
 
 export type KeyIndex = {
   accountIndex?: number;
-  role: TRole;
+  role?: TRole;
+  addressIndex?: number;
 };
 
-export type PublicKeyData = Required<KeyIndex> & {
+export type PublicKeyData = {
+  accountIndex: number;
+  addressIndex: number;
   publicKey: TPublicKey;
+  role?: TRole;
 };
 
 export type GetPublicKeyRequest = {

@@ -25,15 +25,48 @@ const KeyIndexToPathMap = {
 
 const CoinType = 0xbee;
 
-export const validateKeyIndexRole = (keyIndex: KeyIndex): void => {
-  if (keyIndex.role === undefined) {
-    throw new InvalidInputError("Key index role is not provided") as Error;
+export const getAddressIndex = (keyIndex: KeyIndex): number => {
+  if (keyIndex.addressIndex !== undefined) {
+    return keyIndex.addressIndex;
   }
-  const keyIndexType = KeyIndexToPathMap[keyIndex.role];
-  if (keyIndexType === undefined) {
+  if (keyIndex.role !== undefined) {
+    return KeyIndexToPathMap[keyIndex.role];
+  }
+  throw new InvalidInputError(
+    "Either role or addressIndex must be provided"
+  ) as Error;
+};
+
+export const validateKeyIndex = (keyIndex: KeyIndex): void => {
+  if (keyIndex.role === undefined && keyIndex.addressIndex === undefined) {
     throw new InvalidInputError(
-      `Invalid key index type: ${keyIndex.role}`
+      "Either role or addressIndex must be provided"
     ) as Error;
+  }
+  if (keyIndex.role !== undefined) {
+    const keyIndexType = KeyIndexToPathMap[keyIndex.role];
+    if (keyIndexType === undefined) {
+      throw new InvalidInputError(
+        `Invalid key index type: ${keyIndex.role}`
+      ) as Error;
+    }
+  }
+  if (keyIndex.addressIndex !== undefined) {
+    if (keyIndex.addressIndex < 0) {
+      throw new InvalidInputError(
+        "Key index address index must not be negative"
+      ) as Error;
+    }
+    if (keyIndex.addressIndex > 0xffffffff) {
+      throw new InvalidInputError(
+        "Key index address index is too large"
+      ) as Error;
+    }
+    if (!Number.isInteger(keyIndex.addressIndex)) {
+      throw new InvalidInputError(
+        "Key index address index must be an integer"
+      ) as Error;
+    }
   }
   if (keyIndex.accountIndex !== undefined && keyIndex.accountIndex < 0) {
     throw new InvalidInputError(
@@ -53,8 +86,8 @@ export const validateKeyIndexRole = (keyIndex: KeyIndex): void => {
 export const keyIndexToPublicKey = async (
   keyIndex: KeyIndex
 ): Promise<string> => {
-  validateKeyIndexRole(keyIndex);
-  const keyIndexType = KeyIndexToPathMap[keyIndex.role];
+  validateKeyIndex(keyIndex);
+  const keyIndexType = getAddressIndex(keyIndex);
 
   const publicKey = await snap.request({
     method: "snap_getBip32PublicKey",
@@ -82,8 +115,8 @@ export const importPrivateKeyToWallet = async (
   wallet: IBeekeeperUnlockedWallet,
   keyIndex: KeyIndex
 ): Promise<TPublicKey> => {
-  validateKeyIndexRole(keyIndex);
-  const keyIndexType = KeyIndexToPathMap[keyIndex.role];
+  validateKeyIndex(keyIndex);
+  const keyIndexType = getAddressIndex(keyIndex);
 
   const bip44 = await snap.request({
     method: "snap_getBip44Entropy",
@@ -97,7 +130,7 @@ export const importPrivateKeyToWallet = async (
     account: keyIndex.accountIndex ?? 0,
     change: 0
   });
-  // Derive the second Hive address, which has a proper index.
+  // Derive the Hive address at the proper index.
   const bip44Node = await deriveHiveAddress(keyIndexType);
   if (!bip44Node.privateKey) {
     throw new InternalError("No private key found") as Error;

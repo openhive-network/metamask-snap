@@ -37,3 +37,7 @@ node_modules/
 
 # Test artifacts
 junit.xml
+
+# IDEs and editors
+.vscode/
+.idea/

@@ -10,7 +10,7 @@ import { getTempWallet } from "../hive/beekeeper";
 import { getWax } from "../hive/wax";
 import {
   importPrivateKeyToWallet,
-  validateKeyIndexRole
+  validateKeyIndex
 } from "../priviledged-apis/key-management";
 import type { KeyIndex } from "../rpc";
 
@@ -31,7 +31,7 @@ export const signTransaction = async (
   }
   for (const key of keys) {
     if (typeof key === "object") {
-      validateKeyIndexRole(key);
+      validateKeyIndex(key);
     } else {
       throw new InvalidInputError("Key data must be an object") as Error;
     }

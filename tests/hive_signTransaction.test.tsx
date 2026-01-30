@@ -335,7 +335,7 @@ describe("onRpcRequest", () => {
       });
     });
 
-    it("should fail when role is missing from key object", async () => {
+    it("should fail when neither role nor addressIndex is provided in key object", async () => {
       const { request } = await installSnap();
 
       const origin = "Jest";
@@ -355,7 +355,7 @@ describe("onRpcRequest", () => {
 
       expect(response).toRespondWithError({
         code: -32000,
-        message: "Key index role is not provided",
+        message: "Either role or addressIndex must be provided",
         stack: expect.any(String)
       });
     });
