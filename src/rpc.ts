@@ -32,7 +32,7 @@ export type SignTransactionRequest = {
 export type EncryptBufferRequest = {
   method: "hive_encrypt";
   params: {
-    buffer: string;
+    buffer: string | number[];
     firstKey: KeyIndex;
     secondKey?: KeyIndex | string;
     nonce?: number;

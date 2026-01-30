@@ -16,13 +16,23 @@ import type { KeyIndex } from "../rpc";
 
 export const encodeBuffer = async (
   origin: string,
-  buffer: string,
+  buffer: string | number[],
   firstKey: KeyIndex,
   secondKey?: KeyIndex | string,
   nonce?: number
 ): Promise<string> => {
+  let displayEncodeData = typeof buffer === "string" ? buffer : "";
+
   if (typeof buffer !== "string") {
-    throw new InvalidInputError("Input buffer must be a string") as Error;
+    if (Array.isArray(buffer)) {
+      displayEncodeData = buffer
+        .map((byte) => byte.toString(16).padStart(2, "0"))
+        .join("");
+    } else {
+      throw new InvalidInputError(
+        "Input buffer must be a string or number array - bytes"
+      ) as Error;
+    }
   }
   if (typeof firstKey !== "object") {
     throw new InvalidInputError("Key data must be an object") as Error;
@@ -35,9 +45,10 @@ export const encodeBuffer = async (
 
   const confirmEncode = await ConfirmBufferSign(
     origin,
-    buffer,
+    displayEncodeData,
     firstKey,
-    secondKey
+    secondKey,
+    typeof buffer === "string" ? undefined : buffer.length
   );
 
   if (!confirmEncode) {
@@ -61,13 +72,28 @@ export const encodeBuffer = async (
     }
 
     try {
-      const response = wax.encrypt(
-        wallet,
-        buffer,
-        publicKeyFirstKey,
-        publicKeySecondKey,
-        nonce
-      );
+      let response: string;
+
+      if (typeof buffer === "string") {
+        response = wax.encrypt(
+          wallet,
+          buffer,
+          publicKeyFirstKey,
+          publicKeySecondKey,
+          nonce
+        );
+      } else {
+        const hashBuffer = await globalThis.crypto.subtle.digest(
+          "SHA-256",
+          new Uint8Array(buffer)
+        );
+
+        const hexDigest = Array.from(new Uint8Array(hashBuffer))
+          .map((b) => b.toString(16).padStart(2, "0"))
+          .join("");
+
+        response = wallet.signDigest(publicKeyFirstKey, hexDigest);
+      }
 
       return response;
     } catch (error) {

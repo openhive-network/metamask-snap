@@ -7,7 +7,8 @@ export const ConfirmBufferSign = async (
   origin: string,
   buffer: string,
   firstKey: KeyIndex,
-  secondKey?: KeyIndex | string
+  secondKey?: KeyIndex | string,
+  byteLength?: number
 ) =>
   snap.request({
     method: "snap_dialog",
@@ -18,7 +19,14 @@ export const ConfirmBufferSign = async (
           <Text>
             <Bold>{origin}</Bold> asked to sign a buffer:
           </Text>
-          <Copyable value={buffer} />
+          {byteLength === undefined ? (
+            <Copyable value={buffer} />
+          ) : (
+            <Box>
+              <Text>Hexadecimal data ({String(byteLength)} bytes):</Text>
+              <Copyable value={buffer} />
+            </Box>
+          )}
           <Text>Confirm if you want to sign it using your:</Text>
           {KeyTypeNotice(firstKey)}
           <Text>This message will be encrypted for: </Text>

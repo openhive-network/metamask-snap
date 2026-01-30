@@ -360,6 +360,102 @@ describe("onRpcRequest", () => {
       });
     });
 
+    it("should successfully sign a byte array buffer for myself", async () => {
+      const { request } = await installSnap();
+
+      const buffer = [72, 101, 108, 108, 111]; // "Hello" in bytes
+
+      const role = "memo";
+      const accountIndex = 0;
+
+      const origin = "Jest";
+      const response = request({
+        origin,
+        method: "hive_encrypt",
+        params: {
+          buffer,
+          firstKey: {
+            role,
+            accountIndex
+          }
+        }
+      });
+
+      const ui = (await response.getInterface()) as SnapConfirmationInterface;
+      expect(ui.type).toBe("confirmation");
+      const props = ui.content.props as any;
+      expect(props.children[0].props.children[0].props.children).toBe(origin);
+      // For byte arrays, the dialog wraps content in a Box with byte length text
+      const byteBox = props.children[1];
+      expect(byteBox.props.children[0].props.children[1]).toBe(
+        String(buffer.length)
+      );
+      expect(byteBox.props.children[1].props.value).toBe("48656c6c6f");
+
+      await ui.ok();
+
+      expect(await response).toRespondWith({
+        buffer: "1f6fefa12b8a4857a4c82806461e7a0e5e3174feda4172cbbe6ea5f64ec10f238b3b81956315ca3dabd7e1bce8e6c91ae7a5e8093aeef5651f5c05f98e5932fd1e"
+      });
+    });
+
+    it("should successfully sign a byte array buffer for other key index", async () => {
+      const { request } = await installSnap();
+
+      const buffer = [1, 2, 3, 4, 5];
+
+      const role = "memo";
+      const accountIndex1 = 0;
+      const accountIndex2 = 1;
+
+      const origin = "Jest";
+      const response = request({
+        origin,
+        method: "hive_encrypt",
+        params: {
+          buffer,
+          firstKey: {
+            role,
+            accountIndex: accountIndex1
+          },
+          secondKey: {
+            role,
+            accountIndex: accountIndex2
+          }
+        }
+      });
+
+      const ui = (await response.getInterface()) as SnapConfirmationInterface;
+      expect(ui.type).toBe("confirmation");
+      await ui.ok();
+
+      expect(await response).toRespondWith({
+        buffer: "1fc33a41bf1560b608c821815e186c0eeeb6f25112025696768bc9fd5478f34baa3ef1494aaf56a08e6cfcb727a67f92c98ce8a4b58340b515bf8d892ec852ae4a"
+      });
+    });
+
+    it("should fail when buffer is invalid type (not string or array)", async () => {
+      const { request } = await installSnap();
+
+      const origin = "Jest";
+      const response = await request({
+        origin,
+        method: "hive_encrypt",
+        params: {
+          buffer: 12345,
+          firstKey: {
+            role: "memo"
+          }
+        }
+      });
+
+      expect(response).toRespondWithError({
+        code: -32000,
+        message: "Input buffer must be a string or number array - bytes",
+        stack: expect.any(String)
+      });
+    });
+
     it("should fail when firstKey has an unsupported role", async () => {
       const { request } = await installSnap();
 
@@ -445,7 +541,7 @@ describe("onRpcRequest", () => {
 
       expect(response).toRespondWithError({
         code: -32000,
-        message: "Input buffer must be a string",
+        message: "Input buffer must be a string or number array - bytes",
         stack: expect.any(String)
       });
     });
