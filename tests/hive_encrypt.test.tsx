@@ -395,7 +395,8 @@ describe("onRpcRequest", () => {
       await ui.ok();
 
       expect(await response).toRespondWith({
-        buffer: "1f6fefa12b8a4857a4c82806461e7a0e5e3174feda4172cbbe6ea5f64ec10f238b3b81956315ca3dabd7e1bce8e6c91ae7a5e8093aeef5651f5c05f98e5932fd1e"
+        buffer:
+          "1f6fefa12b8a4857a4c82806461e7a0e5e3174feda4172cbbe6ea5f64ec10f238b3b81956315ca3dabd7e1bce8e6c91ae7a5e8093aeef5651f5c05f98e5932fd1e"
       });
     });
 
@@ -430,7 +431,8 @@ describe("onRpcRequest", () => {
       await ui.ok();
 
       expect(await response).toRespondWith({
-        buffer: "1fc33a41bf1560b608c821815e186c0eeeb6f25112025696768bc9fd5478f34baa3ef1494aaf56a08e6cfcb727a67f92c98ce8a4b58340b515bf8d892ec852ae4a"
+        buffer:
+          "1fc33a41bf1560b608c821815e186c0eeeb6f25112025696768bc9fd5478f34baa3ef1494aaf56a08e6cfcb727a67f92c98ce8a4b58340b515bf8d892ec852ae4a"
       });
     });
 
@@ -590,6 +592,90 @@ describe("onRpcRequest", () => {
         message: "User denied the buffer encode",
         stack: expect.any(String)
       });
+    });
+
+    it("should sign image for image hoster", async () => {
+      const { request } = await installSnap();
+
+      const imageStr = "<svg xmlns='http://www.w3.org/2000/svg'/>";
+      const imageData = new TextEncoder().encode(imageStr);
+      /* eslint-disable-next-line no-restricted-globals */
+      const svgBlob = new Blob([imageData], { type: "image/svg+xml" });
+
+      // Image hoster logic:
+
+      // Create the prefix as a Uint8Array
+      const encoder = new TextEncoder();
+      const prefix = encoder.encode("ImageSigningChallenge");
+
+      // Concatenate without Buffer.concat
+      // We create a new array of the total length and "set" the parts into it
+      const signingBuffer = new Uint8Array(prefix.length + imageData.length);
+      signingBuffer.set(prefix);
+      signingBuffer.set(imageData, prefix.length);
+      const buffer = Array.from(signingBuffer);
+
+      const role = "posting";
+      const accountIndex = 0;
+
+      const origin = "Jest";
+      const response = request({
+        origin,
+        method: "hive_encrypt",
+        params: {
+          buffer,
+          firstKey: {
+            role,
+            accountIndex // Using: "STM815feFpPR2eBsmhkzTwQDmomKYNWQMSUg9kndoQxT5U6FyqfDT" (posting key)
+          }
+        }
+      });
+
+      const ui = (await response.getInterface()) as SnapConfirmationInterface;
+      expect(ui.type).toBe("confirmation");
+      await ui.ok();
+
+      const signatureResponse = await response;
+
+      expect(signatureResponse).toRespondWith({
+        buffer:
+          "1f97060801ad1b5de2182a1604a28a63d2ea8ea95f5eb82e799ba7b5ed31defd6b48411cfca50745b71e198a4f660f2ee8f8ee137c1699d56dbe71059535439ed6"
+      });
+
+      const signature = (
+        signatureResponse.response as { result: { buffer: string } }
+      ).result.buffer;
+
+      /* eslint-disable-next-line no-restricted-globals, n/no-unsupported-features/node-builtins */
+      const formData = new FormData();
+      formData.append("file", svgBlob, "image.svg");
+
+      const postingKeyAddedUser =
+        /* eslint-disable-next-line n/no-process-env, jest/no-conditional-in-test */
+        process.env.POSTING_KEY_ADDED_USER ?? "guest4test";
+
+      const imageHosterUrl =
+        /* eslint-disable-next-line n/no-process-env, jest/no-conditional-in-test */
+        process.env.IMAGE_HOSTER_URL ?? "https://images.hive.blog";
+
+      const postUrl = `${imageHosterUrl}/${postingKeyAddedUser}/${signature}`;
+
+      /* eslint-disable-next-line n/no-unsupported-features/node-builtins */
+      const imageUploadResponse = await fetch(postUrl, {
+        method: "POST",
+        body: formData
+      });
+      const resJSON = await imageUploadResponse.json();
+
+      console.log("Image hoster reponded with:", resJSON);
+
+      const matchRegex = new RegExp(
+        `^${imageHosterUrl}/[a-zA-Z0-9]+/image\\.svg$`,
+        "u"
+      );
+
+      // https://images.hive.blog/DQmVsw5pPTUjXLFBv9yrA5TSSwv4VmXPPzGc87sRNiZbRsm/image.svg
+      expect(resJSON.url).toMatch(matchRegex);
     });
   });
 });
