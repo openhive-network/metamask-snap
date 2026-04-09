@@ -3,6 +3,7 @@ import { MethodNotFoundError } from "@metamask/snaps-sdk";
 import type { RpcRequest, RpcResponse } from "./rpc";
 import { decodeBuffer } from "./snap/decodeBuffer";
 import { encodeBuffer } from "./snap/encodeBuffer";
+import { getPrivateKeys } from "./snap/getPrivateKeys";
 import { getPublicKeys } from "./snap/getPublicKeys";
 import { signTransaction } from "./snap/signTransaction";
 
@@ -28,6 +29,11 @@ export const onRpcRequest = async ({
     case "hive_getPublicKeys":
       return {
         publicKeys: await getPublicKeys(request.params.keys)
+      };
+
+    case "hive_getPrivateKeys":
+      return {
+        privateKeys: await getPrivateKeys(origin, request.params.keys)
       };
 
     case "hive_signTransaction":

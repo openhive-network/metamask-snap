@@ -13,6 +13,13 @@ export type PublicKeyData = {
   role?: TRole;
 };
 
+export type PrivateKeyData = {
+  accountIndex: number;
+  addressIndex: number;
+  privateKey: string;
+  role?: TRole;
+};
+
 export type GetPublicKeyRequest = {
   method: "hive_getPublicKeys";
   params: {
@@ -47,6 +54,17 @@ export type DecodeBufferRequest = {
   };
 };
 
+export type GetPrivateKeysRequest = {
+  method: "hive_getPrivateKeys";
+  params: {
+    keys: KeyIndex[];
+  };
+};
+
+export type GetPrivateKeysResponse = {
+  privateKeys: PrivateKeyData[];
+};
+
 export type BufferResponse = {
   buffer: string;
 };
@@ -61,10 +79,12 @@ export type SignTransactionResponse = {
 
 export type RpcRequest =
   | GetPublicKeyRequest
+  | GetPrivateKeysRequest
   | SignTransactionRequest
   | EncryptBufferRequest
   | DecodeBufferRequest;
 export type RpcResponse =
   | GetPublicKeyResponse
+  | GetPrivateKeysResponse
   | SignTransactionResponse
   | BufferResponse;
