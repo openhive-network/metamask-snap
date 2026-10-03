@@ -81,6 +81,14 @@ export const validateKeyIndex = (keyIndex: KeyIndex): void => {
       "Key index account index is too large"
     ) as Error;
   }
+  if (
+    keyIndex.accountIndex !== undefined &&
+    !Number.isInteger(keyIndex.accountIndex)
+  ) {
+    throw new InvalidInputError(
+      "Key index account index must be an integer"
+    ) as Error;
+  }
 };
 
 export const keyIndexToPublicKey = async (
