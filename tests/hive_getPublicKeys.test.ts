@@ -420,6 +420,44 @@ describe("onRpcRequest", () => {
       });
     });
 
+    it("should fail when addressIndex is not an integer", async () => {
+      const { request } = await installSnap();
+
+      const origin = "Jest";
+      const response = await request({
+        origin,
+        method: "hive_getPublicKeys",
+        params: {
+          keys: [{ accountIndex: 0, addressIndex: 1.5 }]
+        }
+      });
+
+      expect(response).toRespondWithError({
+        message: "Key index address index must be an integer",
+        code: -32000,
+        stack: expect.any(String)
+      });
+    });
+
+    it("should fail when accountIndex is not an integer", async () => {
+      const { request } = await installSnap();
+
+      const origin = "Jest";
+      const response = await request({
+        origin,
+        method: "hive_getPublicKeys",
+        params: {
+          keys: [{ accountIndex: 1.5, role: "active" }]
+        }
+      });
+
+      expect(response).toRespondWithError({
+        message: "Key index account index must be an integer",
+        code: -32000,
+        stack: expect.any(String)
+      });
+    });
+
     it("should fail when keys param is missing", async () => {
       const { request } = await installSnap();
 
