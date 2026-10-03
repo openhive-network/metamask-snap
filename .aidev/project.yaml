@@ -1,0 +1,83 @@
+# Profile for hive/metamask-snap, written by `aidev project scaffold` (#13561).
+#
+# Schema reference: docs/architecture/project-profile.md
+# Onboarding procedure: the `onboard-external-project` skill.
+# Guide: docs/operations/onboarding-an-external-project.md
+#
+# The generator writes a starting point, not a governed answer: every
+# binding below is the command a maintainer said this project runs, and it
+# is reviewed and edited like any other declaration.
+version: 2
+project: metamask-snap
+
+gitlab:
+  host: "gitlab.syncad.com"
+  path: "hive/metamask-snap"
+  id: 514
+
+# A single-branch topology: this is both what work integrates into and what
+# ships. `stable` is omitted rather than declared equal to it.
+# AIDEV integrates into its own branch; people merge it into main through
+# merge requests (as in hive/denser), so `stable` is omitted and `aidev release`
+# never moves main.
+branches:
+  integration: "aidev/integration"
+
+# How this project's suites execute (#13892): one kind, stated once.
+environment:
+  kind: "container"
+  image: "registry.gitlab.syncad.com/hive/metamask-snap/aidev-tests@sha256:83ccdc959d824f48745d2ad04b6b5f5119ad5004da260f8a0a2e3e5350d74fd3"
+  inputs: ["pnpm-lock.yaml"]
+
+issues:
+  intake_label: todo
+  taxonomy: ".aidev/labels.yaml"
+  decompose:
+    # `never` is where an external project starts: nothing marks work
+    # approved on this project's behalf until there is a track record.
+    auto_todo: never
+  # Reports about this project's work are filed against this project.
+  watcher_reports: self
+
+# Verification slots. Each binding is what this project genuinely runs for
+# that slot — never one selection repeated under seven names, which makes
+# seven gates report on the same evidence while claiming to check seven
+# different things.
+verification:
+  quick:
+    adapter: command
+    args: [".aidev/run-checks.sh", "quick", "lint", "snapper", "build", "test"]
+    artifacts: ["test-results/quick/"]
+  full:
+    adapter: command
+    args: [".aidev/run-checks.sh", "full", "lint", "snapper", "build", "test"]
+    artifacts: ["test-results/full/"]
+  baseline:
+    adapter: command
+    args: [".aidev/run-checks.sh", "baseline", "build", "test"]
+    artifacts: ["test-results/baseline/"]
+  canary:
+    adapter: command
+    args: [".aidev/run-checks.sh", "canary", "lint", "snapper", "build", "test"]
+    artifacts: ["test-results/canary/"]
+  static:
+    adapter: command
+    args: [".aidev/run-checks.sh", "static", "lint", "snapper"]
+    artifacts: ["test-results/static/"]
+  coverage:
+    adapter: command
+    args: [".aidev/run-checks.sh", "coverage", "build", "test"]
+    artifacts: ["test-results/coverage/"]
+  system:
+    adapter: command
+    args: [".aidev/run-checks.sh", "system", "build", "test"]
+    artifacts: ["test-results/system/"]
+
+# Every slot runs .aidev/run-checks.sh (see .aidev/README.md). There is no
+# coverage instrumentation: the Jest suite drives dist/bundle.js inside
+# @metamask/snaps-simulation, so source coverage would read ~0; `coverage` runs
+# the build and the suite. `typecheck` is not bound: CI doesn't run tsc and it
+# fails today (TS5110 in tsconfig.json).
+
+# Capability grants for target-side code. Empty until this project needs one.
+capabilities: []

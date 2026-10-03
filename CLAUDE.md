@@ -45,6 +45,14 @@ tests/                        # Jest test files
 dist/                         # Build output (bundle.js)
 ```
 
+## Working in an AIDEV workflow
+When AIDEV runs you on an issue, no one is there to answer questions. GitLab CI doesn't run for AIDEV branches; the checks below are the verification.
+
+- **Check your change:** run `aidev test run --slot quick` once, after your last edit. It runs ESLint, snapper, `mm-snap build` and the Jest suite against the built bundle (the image-hoster upload test is skipped: suites run without network).
+- **Iterate:** `.aidev/run-checks.sh dev lint` (or `snapper` / `build` / `build test`) runs single steps; `test` needs `build` first.
+- **Don't commit a rebuilt `snap.manifest.json`** just because the build changed its shasum; the checks restore the committed one (see `.aidev/README.md`).
+- **Dependencies:** a change to `pnpm-lock.yaml`, `.npmrc`, `pnpm-workspace.yaml` or `packageManager` needs a new test image. Run `.aidev/runtime/build.sh --push` and put the printed reference in `.aidev/project.yaml` `environment.image` in the same commit (see `.aidev/README.md`).
+
 ## Development Commands
 
 ```bash

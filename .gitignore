@@ -41,3 +41,6 @@ junit.xml
 # IDEs and editors
 .vscode/
 .idea/
+
+# AIDEV suite output (.aidev/run-checks.sh)
+test-results/
