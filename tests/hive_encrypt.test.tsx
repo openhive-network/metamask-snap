@@ -646,7 +646,7 @@ describe("onRpcRequest", () => {
         signatureResponse.response as { result: { buffer: string } }
       ).result.buffer;
 
-      /* eslint-disable-next-line no-restricted-globals, n/no-unsupported-features/node-builtins */
+      /* eslint-disable-next-line no-restricted-globals */
       const formData = new FormData();
       formData.append("file", svgBlob, "image.svg");
 
@@ -660,7 +660,6 @@ describe("onRpcRequest", () => {
 
       const postUrl = `${imageHosterUrl}/${postingKeyAddedUser}/${signature}`;
 
-      /* eslint-disable-next-line n/no-unsupported-features/node-builtins */
       const imageUploadResponse = await fetch(postUrl, {
         method: "POST",
         body: formData

@@ -45,7 +45,7 @@ All permissions are used with the principle of least privilege. No private keys 
 
 ### Prerequisites
 
-- Node.js >= 20.18.1
+- Node.js >= 24
 - pnpm = 10.0.0
 - [MetaMask Flask](https://metamask.io/flask/)
   - ⚠️ You cannot have other versions of MetaMask installed
