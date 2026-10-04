@@ -11,7 +11,7 @@ MetaMask Snap enabling secure Hive blockchain interactions through MetaMask. Der
 
 ## Tech Stack
 
-- **Runtime:** Node.js ^20.18.1 or >= 21.2
+- **Runtime:** Node.js 24 LTS (24.21.0; `engines.node` >=24)
 - **Package Manager:** pnpm 10.0.0 (pinned)
 - **Language:** TypeScript 5.5.4 (strict mode)
 - **Build:** MetaMask Snaps CLI (webpack-based)
@@ -108,4 +108,4 @@ pnpm test             # Run Jest tests
 
 **Cache:** `node_modules/` and `.pnpm-store/` keyed on pnpm-lock.yaml
 
-**Base Image:** node:20.18.3
+**Base Image:** node:24.21.0

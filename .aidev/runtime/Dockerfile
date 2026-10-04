@@ -1,10 +1,10 @@
 # The image AIDEV runs this project's suites in (`environment.image` in
 # .aidev/project.yaml). Suites run with `--network none`, so everything an
-# install needs is in the image: Node 20.18.3 (CI's `image: node:20.18.3`), jq
+# install needs is in the image: Node 24.21.0 (CI's `image: node:24.21.0`), jq
 # (scripts/snapper.sh prints its report with it), pnpm (pinned by package.json's
 # `packageManager`, installed through corepack) and a pnpm store filled from
 # pnpm-lock.yaml. Build and pin it with .aidev/runtime/build.sh; see .aidev/README.md.
-FROM node:20.18.3-bookworm-slim@sha256:ffc11dbf16dd0abcbb7b837410601b4d5592db2d03741e13a4a5336ab74d7ccb
+FROM node:24.21.0-bookworm-slim@sha256:0e0ff40c39bc087845bfb27465a0df4ea419520094bc35842ff83dd8cbe6f9b6
 
 ENV HOME=/tmp \
     COREPACK_HOME=/opt/corepack \

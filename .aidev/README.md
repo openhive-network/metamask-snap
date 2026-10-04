@@ -41,7 +41,7 @@ Differences from CI:
 ## The test runtime image (`runtime/`)
 
 The suites run in a container with `--network none` and your uid. The image carries
-Node 20.18.3 (CI's `image: node:20.18.3`), jq, pnpm (from package.json `packageManager`,
+Node 24.21.0 (CI's `image: node:24.21.0`), jq, pnpm (from package.json `packageManager`,
 through corepack) and a pnpm store filled with `pnpm fetch`. `pnpm-deps.sh` installs
 `node_modules` offline from it, with `--ignore-scripts` as in CI.
 

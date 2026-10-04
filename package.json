@@ -23,7 +23,7 @@
   },
   "packageManager": "pnpm@10.0.0+sha512.b8fef5494bd3fe4cbd4edabd0745df2ee5be3e4b0b8b08fa643aa3e4c6702ccc0f00d68fa8a8c9858a735a0032485a44990ed2810526c875e416f001b17df12b",
   "engines": {
-    "node": "^20.18.1 || >= 21.2"
+    "node": ">=24"
   },
   "type": "commonjs",
   "scripts": {
@@ -41,7 +41,7 @@
     "@hiveio/beekeeper": "1.27.11-stable.250425192022",
     "@hiveio/wax": "1.27.6-rc7-stable.250416082029",
     "@jest/globals": "^29.7.0",
-    "@lavamoat/preinstall-always-fail": "2.1.0",
+    "@lavamoat/preinstall-always-fail": "2.1.1",
     "@metamask/eslint-config": "^14.0.0",
     "@metamask/eslint-config-jest": "^14.0.0",
     "@metamask/eslint-config-nodejs": "^14.0.0",
@@ -53,6 +53,7 @@
     "@metamask/utils": "11.4.0",
     "@sayfer_io/snapper": "0.19.0",
     "@types/jest": "^29.5.14",
+    "@types/node": "^24",
     "eslint": "^9.11.0",
     "eslint-config-prettier": "^9.1.0",
     "eslint-import-resolver-typescript": "^3.6.3",
