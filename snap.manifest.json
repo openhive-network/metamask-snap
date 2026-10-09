@@ -34,7 +34,9 @@
       {
         "coinType": 3054
       }
-    ]
+    ],
+    "snap_manageState": {},
+    "endowment:network-access": {}
   },
   "platformVersion": "6.14.0",
   "manifestVersion": "0.1"
