@@ -66,7 +66,12 @@ const config = createConfig([
   },
 
   {
-    files: ["**/*.test.ts", "**/*.test.tsx", "**/*.test.js"],
+    files: [
+      "**/*.test.ts",
+      "**/*.test.tsx",
+      "**/*.test.js",
+      "tests/helpers/**/*.ts"
+    ],
     extends: [jest, nodejs],
 
     rules: {

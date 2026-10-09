@@ -1,6 +1,11 @@
 import { MethodNotFoundError } from "@metamask/snaps-sdk";
+import type { OnUserInputHandler } from "@metamask/snaps-sdk";
 
 import type { RpcRequest, RpcResponse } from "./rpc";
+import { aiCall } from "./snap/aiCall";
+import { aiForgetKey } from "./snap/aiForgetKey";
+import { aiListKeys } from "./snap/aiListKeys";
+import { aiStoreKey } from "./snap/aiStoreKey";
 import { decodeBuffer } from "./snap/decodeBuffer";
 import { encodeBuffer } from "./snap/encodeBuffer";
 import { getPublicKeys } from "./snap/getPublicKeys";
@@ -60,7 +65,40 @@ export const onRpcRequest = async ({
         )
       };
 
+    case "hive_aiStoreKey":
+      return {
+        stored: await aiStoreKey(
+          origin,
+          request.params.provider,
+          request.params.apiKey,
+          request.params.label
+        )
+      };
+
+    case "hive_aiListKeys":
+      return {
+        keys: await aiListKeys(origin)
+      };
+
+    case "hive_aiForgetKey":
+      return {
+        forgotten: await aiForgetKey(origin, request.params.provider)
+      };
+
+    case "hive_aiCall":
+      return aiCall(
+        origin,
+        request.params.provider,
+        request.params.path,
+        request.params.body
+      );
+
     default:
       throw new MethodNotFoundError() as Error; // Override snapper
   }
 };
+
+// Dialog inputs are read with `snap_getInterfaceState` once the dialog is
+// approved, so input events need no handling. The export has to exist for
+// MetaMask to deliver them.
+export const onUserInput: OnUserInputHandler = async () => Promise.resolve();

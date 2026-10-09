@@ -264,6 +264,163 @@
           }
         }
       }
+    },
+    {
+      "name": "hive_aiStoreKey",
+      "description": "Prototype, not published. Stores an AI provider API key inside the snap after the user confirms a dialog naming the requesting origin and the provider. The key is bound to the origin that stored it and replaces that origin's previous key for the provider; any call allowance for the provider is revoked.",
+      "paramStructure": "by-name",
+      "params": [
+        {
+          "name": "provider",
+          "description": "Allowlisted AI provider",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "enum": ["anthropic", "openai", "deepseek"]
+          }
+        },
+        {
+          "name": "apiKey",
+          "description": "The provider API key: 1 to 1024 printable ASCII characters without spaces",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "label",
+          "description": "Optional label of 1 to 64 characters, returned by hive_aiListKeys",
+          "required": false,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "result": {
+        "name": "aiStoreKeyResult",
+        "description": "The stored key's provider and label. Never the key.",
+        "schema": {
+          "type": "object",
+          "properties": {
+            "stored": {
+              "type": "object",
+              "properties": {
+                "provider": {
+                  "type": "string"
+                },
+                "label": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "hive_aiListKeys",
+      "description": "Prototype, not published. Lists the providers and labels of the keys the requesting origin has stored. Never returns a key.",
+      "paramStructure": "by-name",
+      "params": [],
+      "result": {
+        "name": "aiListKeysResult",
+        "description": "The requesting origin's keys",
+        "schema": {
+          "type": "object",
+          "properties": {
+            "keys": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "provider": {
+                    "type": "string"
+                  },
+                  "label": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "hive_aiForgetKey",
+      "description": "Prototype, not published. Deletes the requesting origin's key and call allowance for a provider.",
+      "paramStructure": "by-name",
+      "params": [
+        {
+          "name": "provider",
+          "description": "Allowlisted AI provider",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "enum": ["anthropic", "openai", "deepseek"]
+          }
+        }
+      ],
+      "result": {
+        "name": "aiForgetKeyResult",
+        "description": "Whether a key was deleted",
+        "schema": {
+          "type": "object",
+          "properties": {
+            "forgotten": {
+              "type": "boolean"
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "hive_aiCall",
+      "description": "Prototype, not published. POSTs a JSON body to an allowlisted provider URL with the key the requesting origin stored, sent only in the provider's auth header (Anthropic: x-api-key; OpenAI and DeepSeek: Authorization Bearer). The user approves each call in a dialog naming the origin, provider and model, and may allow the origin for 15 or 60 minutes. Redirects are refused, the response is capped at 1 MB, and the request times out after 120 seconds. Request/response only: no streaming. Errors: 4100 when the origin has no key for the provider, 4001 when the user rejects, -32000 for an unknown provider, a path that is not allowlisted or a body that is not an object, -32603 for a network failure, timeout, redirect or oversized response.",
+      "paramStructure": "by-name",
+      "params": [
+        {
+          "name": "provider",
+          "description": "Allowlisted AI provider",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "enum": ["anthropic", "openai", "deepseek"]
+          }
+        },
+        {
+          "name": "path",
+          "description": "Request path, matched exactly against the provider's allowlist: anthropic /v1/messages (https://api.anthropic.com), openai /v1/chat/completions (https://api.openai.com), deepseek /chat/completions (https://api.deepseek.com)",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "body",
+          "description": "JSON request body sent to the provider. A string `model` field is shown in the approval dialog.",
+          "required": true,
+          "schema": {
+            "type": "object"
+          }
+        }
+      ],
+      "result": {
+        "name": "aiCallResult",
+        "description": "The provider's response. Any occurrence of the key in the body is replaced with [redacted].",
+        "schema": {
+          "type": "object",
+          "properties": {
+            "status": {
+              "type": "number",
+              "description": "HTTP status code"
+            },
+            "body": {
+              "description": "Response body, parsed as JSON when it is JSON, otherwise the text"
+            }
+          }
+        }
+      }
     }
   ]
 }
