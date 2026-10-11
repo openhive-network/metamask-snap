@@ -65,6 +65,15 @@ build:
     when: always
     expire_in: 1 week
 
+reproducible_build:
+  extends: .npm_based_job
+  stage: build
+  variables:
+    # The script installs into two temporary checkouts; point them at the cached store.
+    npm_config_store_dir: "${CI_PROJECT_DIR}/.pnpm-store"
+  script:
+    - ./scripts/check-reproducible-build.sh
+
 test:
   extends: .npm_based_job
   stage: test

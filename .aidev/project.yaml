@@ -50,7 +50,7 @@ verification:
     artifacts: ["test-results/quick/"]
   full:
     adapter: command
-    args: [".aidev/run-checks.sh", "full", "lint", "snapper", "build", "test"]
+    args: [".aidev/run-checks.sh", "full", "lint", "snapper", "build", "test", "reproducible"]
     artifacts: ["test-results/full/"]
   baseline:
     adapter: command
