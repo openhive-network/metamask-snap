@@ -2,7 +2,7 @@
 # The checks AIDEV's verification slots run (.aidev/project.yaml), as one junit
 # report per suite: each named step is a test case, its log the failure body.
 #
-#   .aidev/run-checks.sh <suite> <step>...   steps: lint typecheck snapper build test
+#   .aidev/run-checks.sh <suite> <step>...   steps: lint typecheck snapper build test reproducible
 #
 #   lint       ESLint (package.json `lint`, CI's lint job)
 #   typecheck  tsc --noEmit over src/, tests/ and snap.config.ts (tsconfig.json).
@@ -20,6 +20,9 @@
 #              job; needs `build` first), every test its own junit case in
 #              $out/jest-junit.xml. The image-hoster upload test posts to
 #              images.hive.blog; suites run without network, so it is skipped.
+#   reproducible  scripts/check-reproducible-build.sh: builds two copies of the
+#              checkout at different absolute paths and fails unless the bundles
+#              and manifest shasums are identical (CI's reproducible_build job)
 set -uo pipefail
 cd "$(dirname "$0")/.."
 
@@ -87,6 +90,7 @@ for s in "$@"; do
         snapper) step snapper scripts/snapper.sh ;;
         build) step build snap_build && record_manifest ;;
         test) step test jest_tests ;;
+        reproducible) step reproducible scripts/check-reproducible-build.sh ;;
         *) echo "unknown step: $s" >&2; exit 2 ;;
     esac
 done

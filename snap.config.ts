@@ -1,5 +1,5 @@
 import type { SnapConfig } from "@metamask/snaps-cli";
-import { resolve } from "path";
+import { relative, resolve, sep } from "path";
 
 const config: SnapConfig = {
   bundler: "webpack",
@@ -14,6 +14,25 @@ const config: SnapConfig = {
     webpackConfig.module.rules.push({
       test: /\.wasm$/u,
       type: "asset/inline"
+    });
+
+    // Webpack inlines `import.meta.url` (used by the emscripten loaders of wax
+    // and beekeeper) as the module's absolute file URL, which would make the
+    // bundle, and so the manifest shasum, depend on the checkout path. Inline
+    // a URL relative to the project root instead.
+    webpackConfig.plugins = webpackConfig.plugins ?? [];
+    webpackConfig.plugins.push((compiler) => {
+      const { DefinePlugin } = compiler.webpack;
+      new DefinePlugin({
+        "import.meta.url": DefinePlugin.runtimeValue(({ module }) =>
+          JSON.stringify(
+            new URL(
+              relative(__dirname, module.resource).split(sep).join("/"),
+              "file:///"
+            ).href
+          )
+        )
+      }).apply(compiler);
     });
 
     return webpackConfig;
