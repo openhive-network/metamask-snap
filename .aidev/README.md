@@ -17,11 +17,13 @@ the failure body. The Jest suite also writes one case per test to `jest-junit.xm
 | `build` | `mm-snap build` -> `dist/bundle.js` (CI's build job) |
 | `manifest-shasum` | (after `build`) pass when the build left `snap.manifest.json` as committed, skipped otherwise |
 | `test` | Jest + `@metamask/snaps-jest` against `dist/bundle.js` (CI's test job) |
+| `reproducible` | `scripts/check-reproducible-build.sh`: builds two copies of the checkout at different absolute paths, fails unless `dist/bundle.js` and the manifest shasum match (CI's `reproducible_build` job) |
 | `typecheck` | `tsc --noEmit`; not bound, it fails today (TS5110 in `tsconfig.json`) and CI doesn't run it |
 
 | Slot | Steps |
 |---|---|
-| quick, full, canary | lint, snapper, build, test |
+| quick, canary | lint, snapper, build, test |
+| full | lint, snapper, build, test, reproducible |
 | static | lint, snapper |
 | baseline, coverage, system | build, test |
 
@@ -31,9 +33,10 @@ Differences from CI:
   `images.hive.blog`, and suites run with `--network none`.
 - **The manifest shasum.** `mm-snap build` rewrites `snap.manifest.json`'s `shasum` when it
   doesn't match the bundle, and CI's build reports this as `(fixed)` and ships the rewritten
-  manifest. The bundle's bytes differ between CI and this image, so the committed shasum
-  matches neither. The tests install the rebuilt manifest; the script restores the committed
-  one when it exits, so the working tree stays clean.
+  manifest. The bundle doesn't depend on the checkout path (`snap.config.ts`), so the committed
+  shasum matches a build from the same sources and lockfile; after a change to either, the
+  tests install the rebuilt manifest and the script restores the committed one when it exits,
+  so the working tree stays clean.
 - **`.npmrc` and `pnpm-workspace.yaml`** are symlinks into the `npm-common-config`
   submodule (hive/common-ci-configuration). The install fails with a clear message when
   the submodule isn't checked out.
