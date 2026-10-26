@@ -3,6 +3,53 @@ import {
   type SnapConfirmationInterface
 } from "@metamask/snaps-jest";
 
+// A decodable 1x1 red RGB PNG: the image hoster rejects images it cannot decode.
+const PNG_1X1_RED_BASE64 =
+  "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAIAAACQd1PeAAAADElEQVR42mP4z8AAAAMBAQD3A0FDAAAAAElFTkSuQmCC";
+
+/**
+ * Uploads a signed image to the image hoster.
+ * @param postUrl - Hoster URL including the account and the upload signature.
+ * @param formData - Multipart body carrying the image as `file`.
+ * @returns The URL the hoster assigned to the uploaded image.
+ * @throws If the hoster is unreachable, rejects the signature, or rejects
+ * the upload for any other reason.
+ */
+const uploadToImageHoster = async (
+  postUrl: string,
+  /* eslint-disable-next-line no-restricted-globals */
+  formData: FormData
+): Promise<string> => {
+  const response = await fetch(postUrl, {
+    method: "POST",
+    body: formData
+  }).catch((error: unknown) => {
+    throw new Error(`Image hoster unreachable at ${postUrl}: ${String(error)}`);
+  });
+
+  const body = await response.text();
+  let resJSON: { url?: unknown; error?: { name?: unknown } };
+  try {
+    resJSON = JSON.parse(body);
+  } catch {
+    throw new Error(
+      `Image hoster returned a non-JSON response (HTTP ${response.status}): ${body}`
+    );
+  }
+
+  if (resJSON.error?.name === "invalid_signature") {
+    throw new Error(`Image hoster rejected the snap's signature: ${body}`);
+  }
+
+  if (!response.ok || typeof resJSON.url !== "string") {
+    throw new Error(
+      `Image hoster rejected the upload for a reason other than the signature (HTTP ${response.status}): ${body}`
+    );
+  }
+
+  return resJSON.url;
+};
+
 describe("onRpcRequest", () => {
   describe("hive_encrypt", () => {
     it("should successfully encode simple buffer for myself - implicit account index 0", async () => {
@@ -597,10 +644,11 @@ describe("onRpcRequest", () => {
     it("should sign image for image hoster", async () => {
       const { request } = await installSnap();
 
-      const imageStr = "<svg xmlns='http://www.w3.org/2000/svg'/>";
-      const imageData = new TextEncoder().encode(imageStr);
+      const imageData = new Uint8Array(
+        Buffer.from(PNG_1X1_RED_BASE64, "base64")
+      );
       /* eslint-disable-next-line no-restricted-globals */
-      const svgBlob = new Blob([imageData], { type: "image/svg+xml" });
+      const pngBlob = new Blob([imageData], { type: "image/png" });
 
       // Image hoster logic:
 
@@ -639,7 +687,7 @@ describe("onRpcRequest", () => {
 
       expect(signatureResponse).toRespondWith({
         buffer:
-          "1f97060801ad1b5de2182a1604a28a63d2ea8ea95f5eb82e799ba7b5ed31defd6b48411cfca50745b71e198a4f660f2ee8f8ee137c1699d56dbe71059535439ed6"
+          "2001e80f7490fc1de6209312aedb0d8cbbb7e48db99fb51ee143aa8b1dd236a78d48b52697584cc816f2423a9c05296c99f2d946a05e9bd4f44888d8cba5aa7e36"
       });
 
       const signature = (
@@ -648,7 +696,7 @@ describe("onRpcRequest", () => {
 
       /* eslint-disable-next-line no-restricted-globals */
       const formData = new FormData();
-      formData.append("file", svgBlob, "image.svg");
+      formData.append("file", pngBlob, "image.png");
 
       const postingKeyAddedUser =
         /* eslint-disable-next-line n/no-process-env, jest/no-conditional-in-test */
@@ -660,21 +708,15 @@ describe("onRpcRequest", () => {
 
       const postUrl = `${imageHosterUrl}/${postingKeyAddedUser}/${signature}`;
 
-      const imageUploadResponse = await fetch(postUrl, {
-        method: "POST",
-        body: formData
-      });
-      const resJSON = await imageUploadResponse.json();
-
-      console.log("Image hoster reponded with:", resJSON);
+      const uploadedUrl = await uploadToImageHoster(postUrl, formData);
 
       const matchRegex = new RegExp(
-        `^${imageHosterUrl}/[a-zA-Z0-9]+/image\\.svg$`,
+        `^${imageHosterUrl}/[a-zA-Z0-9]+/image\\.png$`,
         "u"
       );
 
-      // https://images.hive.blog/DQmVsw5pPTUjXLFBv9yrA5TSSwv4VmXPPzGc87sRNiZbRsm/image.svg
-      expect(resJSON.url).toMatch(matchRegex);
+      // https://images.hive.blog/DQmVsw5pPTUjXLFBv9yrA5TSSwv4VmXPPzGc87sRNiZbRsm/image.png
+      expect(uploadedUrl).toMatch(matchRegex);
     });
   });
 });
