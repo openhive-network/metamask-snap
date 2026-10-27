@@ -5,7 +5,7 @@ import {
 } from "@metamask/snaps-sdk";
 
 import { ConfirmBufferSign } from "./dialogs/ConfirmBufferSign";
-import { getTempWallet, toSignatureProvider } from "../hive/beekeeper";
+import { getTempWallet } from "../hive/beekeeper";
 import { getWax } from "../hive/wax";
 import {
   keyIndexToPublicKey,
@@ -76,7 +76,7 @@ export const encodeBuffer = async (
 
       if (typeof buffer === "string") {
         response = await wax.encrypt(
-          toSignatureProvider(wallet),
+          wallet,
           buffer,
           publicKeyFirstKey,
           publicKeySecondKey,
@@ -92,7 +92,7 @@ export const encodeBuffer = async (
           .map((b) => b.toString(16).padStart(2, "0"))
           .join("");
 
-        response = wallet.signDigest(publicKeyFirstKey, hexDigest);
+        response = await wallet.signDigest(publicKeyFirstKey, hexDigest);
       }
 
       return response;
