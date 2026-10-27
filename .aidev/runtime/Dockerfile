@@ -1,10 +1,11 @@
 # The image AIDEV runs this project's suites in (`environment.image` in
 # .aidev/project.yaml). Suites run with `--network none`, so everything an
-# install needs is in the image: Node 24.21.0 (CI's `image: node:24.21.0`), jq
-# (scripts/snapper.sh prints its report with it), pnpm (pinned by package.json's
-# `packageManager`, installed through corepack) and a pnpm store filled from
+# install needs is in the image: Node and jq from common-ci-configuration's
+# node-test-tools image (the Node version ccc's docker-bake.hcl sets, the one CI
+# runs; this file pins none), pnpm (pinned by package.json's `packageManager`,
+# installed through corepack, as CI does) and a pnpm store filled from
 # pnpm-lock.yaml. Build and pin it with .aidev/runtime/build.sh; see .aidev/README.md.
-FROM node:24.21.0-bookworm-slim@sha256:0e0ff40c39bc087845bfb27465a0df4ea419520094bc35842ff83dd8cbe6f9b6
+FROM registry.gitlab.syncad.com/hive/common-ci-configuration/node-test-tools:develop
 
 ENV HOME=/tmp \
     COREPACK_HOME=/opt/corepack \
@@ -13,10 +14,6 @@ ENV HOME=/tmp \
     npm_config_store_dir=/opt/pnpm-store \
     HUSKY=0 \
     DO_NOT_TRACK=1
-
-RUN apt-get update \
-    && apt-get install -y --no-install-recommends jq \
-    && rm -rf /var/lib/apt/lists/*
 
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml .npmrc /tmp/pnpm-fetch/
 RUN cd /tmp/pnpm-fetch \
