@@ -6,7 +6,8 @@ import {
 } from "@metamask/snaps-sdk";
 
 import { ConfirmBufferDecode } from "./dialogs/ConfirmBufferDecode";
-import { getTempWallet } from "../hive/beekeeper";
+import { getTempWallet, toSignatureProvider } from "../hive/beekeeper";
+import { decryptMemo } from "../hive/memo";
 import { getWax } from "../hive/wax";
 import {
   importPrivateKeyToWallet,
@@ -44,7 +45,11 @@ export const decodeBuffer = async (
     await importPrivateKeyToWallet(wallet, decodeKey);
 
     try {
-      const response = wax.decrypt(wallet, buffer);
+      const response = await decryptMemo(
+        wax,
+        toSignatureProvider(wallet),
+        buffer
+      );
 
       return response;
     } catch (error) {

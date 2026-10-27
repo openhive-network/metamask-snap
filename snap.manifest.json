@@ -1,5 +1,5 @@
 {
-  "version": "1.7.0",
+  "version": "1.8.0",
   "description": "Hive wallet extension allowing you to sign transactions using keys derived from your Metamask wallet",
   "proposedName": "Hive Wallet",
   "repository": {
@@ -7,7 +7,7 @@
     "url": "git+https://gitlab.syncad.com/hive/metamask-snap.git"
   },
   "source": {
-    "shasum": "EhnNYEtbnIDKEcJoh652UlmyoBex0Tiy3KGKk7QJIzg=",
+    "shasum": "33od5+wgaZ5Hr9l6jCpjYWhL+yE3KJjqKY/V5Qrp228=",
     "location": {
       "npm": {
         "filePath": "dist/bundle.js",

@@ -69,7 +69,7 @@ export const signTransaction = async (
       const publicKey = await importPrivateKeyToWallet(wallet, key);
 
       try {
-        const signature = tx.sign(wallet, publicKey);
+        const signature = wallet.signDigest(publicKey, tx.sigDigest);
 
         signatures.push(signature);
       } catch (error) {

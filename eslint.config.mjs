@@ -66,6 +66,15 @@ const config = createConfig([
   },
 
   {
+    files: ["tests/**/*.mjs"],
+    extends: nodejs,
+
+    languageOptions: {
+      sourceType: "module"
+    }
+  },
+
+  {
     files: ["**/*.test.ts", "**/*.test.tsx", "**/*.test.js"],
     extends: [jest, nodejs],
 

@@ -42,6 +42,59 @@ describe("onRpcRequest", () => {
       });
     });
 
+    it("should decrypt a memo in the standard field order written by wax 1.28.8", async () => {
+      const { request } = await installSnap();
+
+      // wax 1.28.8 `encrypt` from STM8LYDC8gWEtsdFvm4gzRmcsJnmuhCMcpL7vxpXPh6pGUZxE9WhY
+      // to the snap's memo key (account 0), random nonce
+      const encryptedBuffer =
+        "#J5wChPgoXyJikLposomWUVjmEq3TUJRCmmeDs1VeXr9yUhRfJMyoSSje1VSy7b4UM5bYk6sPbttrhWk7on9hextbo5b9SruNDNHe7FLdz5mEWFdDK3CQCguhbqUDPxQ63";
+
+      const response = request({
+        origin: "Jest",
+        method: "hive_decrypt",
+        params: {
+          buffer: encryptedBuffer,
+          firstKey: {
+            role: "memo"
+          }
+        }
+      });
+
+      await ((await response.getInterface()) as SnapConfirmationInterface).ok();
+
+      expect(await response).toRespondWith({
+        buffer: "Hello world"
+      });
+    });
+
+    it("should decrypt a memo in the legacy field order written by snap 1.7.0", async () => {
+      const { request } = await installSnap();
+
+      // hive_encrypt of snap 1.7.0 (wax 1.27.6-rc7) from the snap's memo key
+      // (account 0) to STM8LYDC8gWEtsdFvm4gzRmcsJnmuhCMcpL7vxpXPh6pGUZxE9WhY,
+      // nonce 0: nonce | check | encrypted | from | to
+      const encryptedBuffer =
+        "#111111114qbL26LTwSqQg3VtKqyb2gdS3dmmzUGGfKj97AfZNRspcFEEBFMG8ktypL9c8rj2rAZASs6LLo4e1cD1boDqeDsCZDPcC3kUk4tQvgZTLgtKGVhwyRamuPK";
+
+      const response = request({
+        origin: "Jest",
+        method: "hive_decrypt",
+        params: {
+          buffer: encryptedBuffer,
+          firstKey: {
+            role: "memo"
+          }
+        }
+      });
+
+      await ((await response.getInterface()) as SnapConfirmationInterface).ok();
+
+      expect(await response).toRespondWith({
+        buffer: "Hello world"
+      });
+    });
+
     it("should successfully decrypt a buffer using active key", async () => {
       const { request } = await installSnap();
 
@@ -227,7 +280,9 @@ describe("onRpcRequest", () => {
       expect(await response).toRespondWithError({
         code: -32603,
         data: {
-          cause: expect.stringContaining("Non-typed Error during Wasm call:")
+          cause: expect.stringContaining(
+            "Failed to load crypto memo from string"
+          )
         },
         message: "Failed to decrypt",
         stack: expect.any(String)
