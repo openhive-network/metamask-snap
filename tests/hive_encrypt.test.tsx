@@ -2,6 +2,40 @@ import {
   installSnap,
   type SnapConfirmationInterface
 } from "@metamask/snaps-jest";
+import { base58 } from "@scure/base";
+import { execFile } from "child_process";
+import { resolve } from "path";
+import { promisify } from "util";
+
+// Memo public key of account 0 for the test mnemonic (jest.config.js)
+const SNAP_MEMO_PUBLIC_KEY =
+  "STM7FUkohAwxVdGmkQrmksDZ6icTAMu5344gmVvnLh5CKQwQGEhQF";
+
+/**
+ * Converts a WIF public key into its compressed secp256k1 point.
+ * @param publicKey - `STM`-prefixed public key.
+ * @returns The 33 key bytes, without the checksum.
+ */
+const publicKeyBytes = (publicKey: string): Uint8Array =>
+  base58.decode(publicKey.slice("STM".length)).subarray(0, 33);
+
+/**
+ * Decrypts a memo with the repository's wax, outside the snap.
+ * @param wifPrivateKey - Private key of the memo's sender or recipient.
+ * @param memo - `#`-prefixed memo.
+ * @returns The decrypted content.
+ */
+const waxDecrypt = async (
+  wifPrivateKey: string,
+  memo: string
+): Promise<string> => {
+  const { stdout } = await promisify(execFile)(process.execPath, [
+    resolve(__dirname, "support/waxDecrypt.mjs"),
+    wifPrivateKey,
+    memo
+  ]);
+  return stdout;
+};
 
 // A decodable 1x1 red RGB PNG: the image hoster rejects images it cannot decode.
 const PNG_1X1_RED_BASE64 =
@@ -93,7 +127,7 @@ describe("onRpcRequest", () => {
 
       expect(await response).toRespondWith({
         buffer:
-          "#111111114nr3f4fuhkhDsMaueiLLqSjLYCne6pBT67vLvkNN6kGskRXZv6cfpPqscHKK8KBPXUdpcyYbqj1D2HvB7fxdWc7Db32swnHeyQiXtv4kPbM3AmpLfBnVTuC"
+          "#FZ6E2HYaifQzeQcb65G3K655Y78FjGxarYE2hqRVQZdfzN5MzTSQeyFHrW6vdurgYZemzZqYXjoRyxwEJyPav3kv8uAZKg3juyTpSTowhEV5KjjUmanMnyUn1DsUTLVe5"
       });
     });
 
@@ -139,7 +173,7 @@ describe("onRpcRequest", () => {
 
       expect(await response).toRespondWith({
         buffer:
-          "#111111114nr3f4fuhkhDsMaueiLLqSjLYCne6pBT67vLvkNN6kGskRXZv6cfpPqscHKK8KBPXUdpcyYbqj1D2HvB7fxdWc7Db32swnHeyQiXtv4kPbM3AmpLfBnVTuC"
+          "#FZ6E2HYaifQzeQcb65G3K655Y78FjGxarYE2hqRVQZdfzN5MzTSQeyFHrW6vdurgYZemzZqYXjoRyxwEJyPav3kv8uAZKg3juyTpSTowhEV5KjjUmanMnyUn1DsUTLVe5"
       });
     });
 
@@ -188,7 +222,7 @@ describe("onRpcRequest", () => {
 
       expect(await response).toRespondWith({
         buffer:
-          "#11111111GYeDYrsrBrR7NzNFVbRSqxo3SqER8KRBRvueAbKJiEdc9JHFwFGXME8rW5Q7yLmzyFqhR75Qm4sneYgoGV4AahmWvvTtU3RScUBadbKNZyxV1hs72GNk1e2"
+          "#FZ6E2HYaifQzeQcb65G3K655Y78FjGxarYE2hqRVQZdfzMYKByx48X2iJPkSzkBGEvFejrrmTFw4hsYL1Kn3szC3qe7x3S7mAcPKrKNDBR72uM3mD4uNn7H1r2aKaY5RY"
       });
     });
 
@@ -232,8 +266,49 @@ describe("onRpcRequest", () => {
 
       expect(await response).toRespondWith({
         buffer:
-          "#111111114qbL26LTwSqQg3VtKqyb2gdS3dmmzUGGfKj97AfZNRspcFEEBFMG8ktypL9c8rj2rAZASs6LLo4e1cD1boDqeDsCZDPcC3kUk4tQvgZTLgtKGVhwyRamuPK"
+          "#FZ6E2HYaifQzeQcb65G3K655Y78FjGxarYE2hqRVQZdfzQ1MhPEvCBtxFzopiZQbf8Z7wn215vjcFCBrHjukt8Wjg2TpUdgTdvqjYi3rEcjibFjozeReHPL3nMMBDkBuX"
       });
+    });
+
+    it("should encode a memo in the standard field order that wax decrypts with the recipient's key", async () => {
+      const { request } = await installSnap();
+
+      const buffer = "Hello world";
+      // private key: 5KRSDQEeNsLdSBKqxLEB98BvEMkw9gAEHKj4Grvd92agWN6Hq1B
+      const recipientPrivateKey =
+        "5KRSDQEeNsLdSBKqxLEB98BvEMkw9gAEHKj4Grvd92agWN6Hq1B";
+      const recipientPublicKey =
+        "STM8LYDC8gWEtsdFvm4gzRmcsJnmuhCMcpL7vxpXPh6pGUZxE9WhY";
+
+      const response = request({
+        origin: "Jest",
+        method: "hive_encrypt",
+        params: {
+          buffer,
+          firstKey: {
+            role: "memo"
+          },
+          secondKey: recipientPublicKey
+        }
+      });
+
+      await ((await response.getInterface()) as SnapConfirmationInterface).ok();
+
+      const encryptResponse = await response;
+      const memo = (encryptResponse.response as { result: { buffer: string } })
+        .result.buffer;
+      expect(memo.startsWith("#")).toBe(true);
+
+      // from | to | nonce | check | encrypted
+      const bytes = base58.decode(memo.slice(1));
+      const from = bytes.subarray(0, 33);
+      const to = bytes.subarray(33, 66);
+      expect([0x02, 0x03]).toContain(from[0]);
+      expect([0x02, 0x03]).toContain(to[0]);
+      expect(from).toStrictEqual(publicKeyBytes(SNAP_MEMO_PUBLIC_KEY));
+      expect(to).toStrictEqual(publicKeyBytes(recipientPublicKey));
+
+      expect(await waxDecrypt(recipientPrivateKey, memo)).toBe(buffer);
     });
 
     it("should successfully encode buffer with a non-default role (active)", async () => {
@@ -275,7 +350,7 @@ describe("onRpcRequest", () => {
 
       expect(await response).toRespondWith({
         buffer:
-          "#111111117yqGc5E9CHFw1Q7NPiUJfgUZw1RLs4DhqjZhf5G7es6CQPreDvoTfQCjmyVx9HpkFsZSofjZsxLTULuhPqUZMq1kXCfBRfDabrLrzmqwWH6YM7sSC42uDuA"
+          "#CehkFy2vFmLo9su3JGukRfDNFZURck4A2JVH6GuEzKMeeZCkZNh7SDjYRgWap5UsLm26P6MgrDQ4sgyfMpwbpzqG3TVukooVSn94yp4CBhXZv1h3obiL9CuEsVDxzProy"
       });
     });
 
@@ -318,7 +393,7 @@ describe("onRpcRequest", () => {
 
       expect(await response).toRespondWith({
         buffer:
-          "#11111111N5UZWjwf2UzcJsMQMWhdtEFgYNX3qWVNhc7jyMxv1yDNEQDMDQSCJ3EczvTieskoKVsf4GPVjupcvhRhXaeC3eUmsgRF6CAxvzPpQ6AyqHqZX2HfZr3GDDY"
+          "#DSrGaeRFFKdevEfiPofsYYAV4QCL3ux2r1yGap8vPSGNTU2sYM97K8sJgXXnxKKSx2sEwN2eieKjH9bWPhfcXSVoVJTB1Sk3sr6f7DTc3dwPfJ2wwRAEAwyXf3nHAzCRb"
       });
     });
 
@@ -360,7 +435,7 @@ describe("onRpcRequest", () => {
 
       expect(await response).toRespondWith({
         buffer:
-          "#111111114nr3f4fHNY7j1nKU73F9uJdAfGB4gNDKe7VUEZtdpAMhVFGu1edfHveG4sYeHqkeP1gJpDZ4g57DyktxXd1SgDfenrm4vSizBVjZKyge15FGxUC4E5huH4W"
+          "#FZ6E2HYaifQzeQcb65G3K655Y78FjGxarYE2hqRVQZdfzN5MzTSQeyFHrW6vdurgYZemzZqYXjoRyxwEJyPav3kv8uAZKg3juyTpSTowhEUiC22YVkWWwcDkHeaftuZHY"
       });
     });
 
@@ -403,7 +478,7 @@ describe("onRpcRequest", () => {
 
       expect(await response).toRespondWith({
         buffer:
-          "#111111116f8Tdwa2mKy1zi6q9egTkiMGvW4gTgTwgLH1b47nmKkDcxXLcM4Tu7aFkEq3dME18ULJg862bcnAydHxYbeft8Nff41sgHXvrVn681VF1p3BCpY7FsrvcV9hxeFn3akhRD1qeWpYSQDrnA8gvZtTmDB7TqdwB5zgmp8g6AMeyKNmxiRi5AqrM2MmjEQfScRYT8ojJyXiVyKVsxtifEY8ynven7BgnMBse1vrdeKLw1wRMj1rarCNLzHEPqW8Rzhfac9Yae2hbu4t9LpDrhN8vM2mu4ysKBogV5aXnEKtjbXYXxku5VN3n1p6T4cRePGzsxnoctmjbCeMDoY7vCwbZACXKaYivH8Lpyzm4sho2fwPGMZPCWoBskjFrxdyFb4kVemhat8AX1TUvy6y2DaE8rrGCWef1uR9PUBRos5x4eGu7AdKiXwwcZQej7caad1JpYWruwZJEuyyhs7k8oydkV9aDCjMos9giX7XhEJXe31zFJ87QVoEdrXHY4BHNuUdaQpTYtsfjmrHW5gD4ATj79GYJTcnjMWdf8LMFVvscYMqpWMSd5ru7xGk1Cbco7nPKJV8k4GynBCXe4uWu8d4E6tkfWBpqmwvdbknU6WbTEaBrtet6SizYvGzVSfUMwzn23FULFTEjshTCEiXXhu7h2a9cFfCLDWWhZQ4DHqYM55TzyrvqPg8vAH7ToAA49M2HbZ5kEbwiiiZoWpYabSLQaA77qyEV2EMPEGdDeH8r9GCKTAndw8zmArJkjEewbD8prA74NwVzUHgCgcnvFnAZtZYTi7mpmNNDYmFB9LMyXEM97Uw748ZwNraGE3cBANAnrtNgif9iwmUVG6sZRSGd71D3LUewDxm3tAAz6xpqBJ1vL6yMTP2pL8TnZuTQq4Hffy7h7cTDuXgWuHL2iqaSzDgspMRqbqWmPXvxR4tN1YURu5P6UjQ7QvbafSkceKqCgLvbnyntWCXZ8Ma6NkP3Zjo3AZ1hHH7VLLAy1otiwwaQGLxTm3pkkEK5t5MKbzATtri1wH5Eecp5yWBMbLpxN7TKmLWH315mdBoxfiforAkMV6S3qtMQc1E2c8mQmiyQSCjFYmr6Ztpi5oWwh3BGTAC23EQ2ZkfqYmxMCQqAXAAqXgRbVAD7bXwsN8SH8rMwPjba6nMtSW1adsGXqKRy4WMmtsCpVVCxid3KzQ2quyrpeeou6Sq38NoSk6NsrrkatY5qjioZoRm5q1TDWfrMDmp29kMdEVzYsCqJh8grsJGsbhb6c71gU1fiB2sJJ8Lw25T3PRc7zvDnz8jmhTQUudYsF3p5JuRQZSFhRBn9YRcb6B5ZPC9GYxBKNXEDgWVhf6G1a2e6PhV2Qmm9amT7bRnAJ6ocJpoAunqYcdRFcNv7TmxekobaJMQKYX2yqU5GgzLyuQ1zt6NmYxFEHMwEtX5pQBDYXGTnKbgzYeemfBxwsw1RcAeWpGKrUssofRjaTL"
+          "#Niqfh4vftYfuUnBRrEjDzWkVrXAd896kWcfb3vT5hmnNmehuMoQvr9WueYPU4ZyGtrGG75pmAU3juvUsAuSvhfvybUKw3XNsUrH25yfzLPMsts1vUWV3uqKMa7vAaudAQEmhL63iiEEtbfbgmLBjDYhJXP7dSrKmi4Mj9ajNMXWiKFtC4AUwpGxfqcPVkuLK28PRsTFzmDEv8HMc9znMMs5qbvdHVteqcFXCzFFZir7QiuRDbLZuNxYYaStGx6E1DJs8Kw8ggfhtr5nqcBFnCagBteJ7ufqd4fvXA6q53j4o56ENns62nQ8o8kzYUTJJCYS6Ca9194u9VYCRXnkYxVTvArNeHPwKYjZfWdHot33CDV6VPvJW8xy9KwWBEwxxpsTmoTjtcuXXvcjtNcRPYfs8YVDCujXSg3sBmsUiyjweVvGnu1rm7k1gS9EXtXAp7vdu2RNGfQuSju7vYarEX2nAL7t12JsFZe9p7TJPtAidG5Dng7GEw12VKKJg92CnoMoPwbHfuFro8uKRUHRG2vM3nWW4izmFJQ6Kexbjp6no9RDxy5kxLfRVNsRkGRChSzwMEfVFZujTxiPXUZc21bpjS7p4g4cKCao2qpuYLEoCPaLkZ2XR61XxXSRx4brTAuNLnxqmzd7otkRnuHrpXAMZSwQvfipwWUatfcYwEtN9xFi2N8FiTfKEvUsVLYrCZ5NqQKRgNb6P3cyNKdQcgijTHJHo72Q3eqDyiAjEkNPqjCEou9BqPbQs9vN9KFohJiqw5rbKcfmZarykC91pnGbUdTPCmfZopsBb6ogYpqpiLZTuwifrwAN6JhFL9VVX331pRwF9RjQvu6d2mfJnj2W4Bwp97gKfhD3VesVwgU1sBo9pExkdWgtTrBY94UUQ6fyEmQHWcBvzWcHWW1mqvyxFCwY9cDjBMQ8UekaB9kW4JM61t3xp5KNVAXeBNGv92HEqmn62pFe94nJ35RkDEuzwNr43mpoGgQovE4u1q587uhsyywxP12Va9iuuP898EFUNG2o7RRckD1wxPwcZ1z9xZUCXkwDfJik7uM6ZVGZHkK2M6CD2eBGKqWjZ3KtKerpUr76fhj2SbxG39LuXM3x6W8Gk565nocBtmTRhTjWbnYeZbFxxk47gxUHSShsaPUqWNNBBa2Ce7ToFdH12WDQ67P7yDxcZwWYFvpgtwDCGBwUg9iMAtGLBtoREfqfzn5JxboTxxaePMPAN4UQuiMxufDAgNDsaoUY5vyw72avUckRXCcgStx1enRR5g1xvR7pJddJDZuxZcxCCpqbjMR5jUnURMgzijPsVXdsMikbhGp84qunGecas3xJn4egzmQLNu3zspvcoPrSD1CQnMxY9B8j331CSp4agJMyjQfxZALPzzxmvDQRquHGzYgqseaVua5e6RdNpU7zqPuu9d4Q9U3duwk9hhMDHiHUvHbFXaTuQNyjz5ZSgii5ZQN3CHEQTZ1jBBKdHZ"
       });
     });
 
