@@ -2,13 +2,27 @@ import createBeekeeper, {
   type IBeekeeperUnlockedWallet,
   type IBeekeeperSession
 } from "@hiveio/beekeeper";
-import type { ISignatureProvider } from "@hiveio/wax";
 import { InternalError } from "@metamask/snaps-sdk";
 
 let _session: Promise<IBeekeeperSession> | undefined;
 
+/**
+ * Gives beekeeper's emscripten runtime the `performance.now()` clock it reads
+ * when creating sessions. Snaps get no `performance` endowment, so the clock
+ * falls back to the snap's `Date`.
+ */
+const providePerformanceClock = (): void => {
+  if (typeof globalThis.performance === "undefined") {
+    globalThis.performance = {
+      now: () => Date.now()
+    } as typeof globalThis.performance;
+  }
+};
+
 const getBeekeeperSession = async (): Promise<IBeekeeperSession> => {
   if (!_session) {
+    providePerformanceClock();
+
     return (_session = createBeekeeper({
       enableLogs: false,
       inMemory: true
@@ -45,20 +59,3 @@ export const getTempWallet = async (): Promise<IBeekeeperUnlockedWallet> => {
     }) as Error;
   }
 };
-
-/**
- * Presents a beekeeper wallet as the asynchronous signature provider wax's
- * `encrypt` and `decrypt` take; beekeeper's own methods are synchronous.
- * @param wallet - Unlocked wallet holding the keys to use.
- * @returns A provider delegating to `wallet`.
- */
-export const toSignatureProvider = (
-  wallet: IBeekeeperUnlockedWallet
-): ISignatureProvider => ({
-  signDigest: async (publicKey, sigDigest) =>
-    wallet.signDigest(publicKey, sigDigest),
-  encryptData: async (content, key, anotherKey, nonce) =>
-    wallet.encryptData(content, key, anotherKey, nonce),
-  decryptData: async (content, key, anotherKey) =>
-    wallet.decryptData(content, key, anotherKey)
-});

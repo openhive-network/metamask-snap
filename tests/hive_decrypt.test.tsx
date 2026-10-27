@@ -350,7 +350,9 @@ describe("onRpcRequest", () => {
       expect(await response).toRespondWithError({
         code: -32603,
         data: {
-          cause: expect.stringContaining("Decryption failed")
+          cause: expect.stringContaining(
+            "No matching private key found for ECDH decryption"
+          )
         },
         message: "Failed to decrypt",
         stack: expect.any(String)

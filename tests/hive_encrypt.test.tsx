@@ -103,7 +103,7 @@ describe("onRpcRequest", () => {
           firstKey: {
             role
           },
-          nonce: 0 // Makes test results deterministic
+          nonce: 1 // Makes test results deterministic
         }
       });
 
@@ -127,7 +127,7 @@ describe("onRpcRequest", () => {
 
       expect(await response).toRespondWith({
         buffer:
-          "#FZ6E2HYaifQzeQcb65G3K655Y78FjGxarYE2hqRVQZdfzN5MzTSQeyFHrW6vdurgYZemzZqYXjoRyxwEJyPav3kv8uAZKg3juyTpSTowhEV5KjjUmanMnyUn1DsUTLVe5"
+          "#FZ6E2HYaifQzeQcb65G3K655Y78FjGxarYE2hqRVQZdfzN5MzTSQeyFHrW6vdurgYZemzZqYXjoRyxwEJyPav3kv8uDC3BAZhhLV6iEEUExFJzCgqY7AJoBgsXuaaQzxj"
       });
     });
 
@@ -151,7 +151,7 @@ describe("onRpcRequest", () => {
           secondKey: {
             role
           },
-          nonce: 0
+          nonce: 1
         }
       });
 
@@ -173,7 +173,7 @@ describe("onRpcRequest", () => {
 
       expect(await response).toRespondWith({
         buffer:
-          "#FZ6E2HYaifQzeQcb65G3K655Y78FjGxarYE2hqRVQZdfzN5MzTSQeyFHrW6vdurgYZemzZqYXjoRyxwEJyPav3kv8uAZKg3juyTpSTowhEV5KjjUmanMnyUn1DsUTLVe5"
+          "#FZ6E2HYaifQzeQcb65G3K655Y78FjGxarYE2hqRVQZdfzN5MzTSQeyFHrW6vdurgYZemzZqYXjoRyxwEJyPav3kv8uDC3BAZhhLV6iEEUExFJzCgqY7AJoBgsXuaaQzxj"
       });
     });
 
@@ -200,7 +200,7 @@ describe("onRpcRequest", () => {
             role,
             accountIndex: accountIndex2
           },
-          nonce: 0
+          nonce: 1
         }
       });
 
@@ -222,7 +222,7 @@ describe("onRpcRequest", () => {
 
       expect(await response).toRespondWith({
         buffer:
-          "#FZ6E2HYaifQzeQcb65G3K655Y78FjGxarYE2hqRVQZdfzMYKByx48X2iJPkSzkBGEvFejrrmTFw4hsYL1Kn3szC3qe7x3S7mAcPKrKNDBR72uM3mD4uNn7H1r2aKaY5RY"
+          "#FZ6E2HYaifQzeQcb65G3K655Y78FjGxarYE2hqRVQZdfzMYKByx48X2iJPkSzkBGEvFejrrmTFw4hsYL1Kn3szC3qeAakwEaxLFzTfUFhAUSrudbVrncCpahMhLQs91SY"
       });
     });
 
@@ -247,7 +247,7 @@ describe("onRpcRequest", () => {
             accountIndex
           },
           secondKey,
-          nonce: 0
+          nonce: 1
         }
       });
 
@@ -266,7 +266,7 @@ describe("onRpcRequest", () => {
 
       expect(await response).toRespondWith({
         buffer:
-          "#FZ6E2HYaifQzeQcb65G3K655Y78FjGxarYE2hqRVQZdfzQ1MhPEvCBtxFzopiZQbf8Z7wn215vjcFCBrHjukt8Wjg2TpUdgTdvqjYi3rEcjibFjozeReHPL3nMMBDkBuX"
+          "#FZ6E2HYaifQzeQcb65G3K655Y78FjGxarYE2hqRVQZdfzQ1MhPEvCBtxFzopiZQbf8Z7wn215vjcFCBrHjukt8Wjg2WTC8oHReiQLLqjaUNC2yymnwPF28QMWkAezeAfk"
       });
     });
 
@@ -311,6 +311,58 @@ describe("onRpcRequest", () => {
       expect(await waxDecrypt(recipientPrivateKey, memo)).toBe(buffer);
     });
 
+    it.each([494, 1000, 2048])(
+      "should encode %i-byte content that hive_decrypt and wax decrypt round-trip",
+      async (size) => {
+        const { request } = await installSnap();
+
+        const buffer = Array.from({ length: size }, (_, index) =>
+          String.fromCharCode(0x21 + (index % 94))
+        ).join("");
+        // private key: 5KRSDQEeNsLdSBKqxLEB98BvEMkw9gAEHKj4Grvd92agWN6Hq1B
+        const recipientPrivateKey =
+          "5KRSDQEeNsLdSBKqxLEB98BvEMkw9gAEHKj4Grvd92agWN6Hq1B";
+        const recipientPublicKey =
+          "STM8LYDC8gWEtsdFvm4gzRmcsJnmuhCMcpL7vxpXPh6pGUZxE9WhY";
+
+        const encryptResponse = request({
+          origin: "Jest",
+          method: "hive_encrypt",
+          params: {
+            buffer,
+            firstKey: {
+              role: "memo"
+            },
+            secondKey: recipientPublicKey
+          }
+        });
+        await (
+          (await encryptResponse.getInterface()) as SnapConfirmationInterface
+        ).ok();
+        const memo = (
+          (await encryptResponse).response as { result: { buffer: string } }
+        ).result.buffer;
+        expect(memo.startsWith("#")).toBe(true);
+
+        const decryptResponse = request({
+          origin: "Jest",
+          method: "hive_decrypt",
+          params: {
+            buffer: memo,
+            firstKey: {
+              role: "memo"
+            }
+          }
+        });
+        await (
+          (await decryptResponse.getInterface()) as SnapConfirmationInterface
+        ).ok();
+        expect(await decryptResponse).toRespondWith({ buffer });
+
+        expect(await waxDecrypt(recipientPrivateKey, memo)).toBe(buffer);
+      }
+    );
+
     it("should successfully encode buffer with a non-default role (active)", async () => {
       const { request } = await installSnap();
 
@@ -329,7 +381,7 @@ describe("onRpcRequest", () => {
             role,
             accountIndex
           },
-          nonce: 0
+          nonce: 1
         }
       });
 
@@ -350,7 +402,7 @@ describe("onRpcRequest", () => {
 
       expect(await response).toRespondWith({
         buffer:
-          "#CehkFy2vFmLo9su3JGukRfDNFZURck4A2JVH6GuEzKMeeZCkZNh7SDjYRgWap5UsLm26P6MgrDQ4sgyfMpwbpzqG3TVukooVSn94yp4CBhXZv1h3obiL9CuEsVDxzProy"
+          "#CehkFy2vFmLo9su3JGukRfDNFZURck4A2JVH6GuEzKMeeZCkZNh7SDjYRgWap5UsLm26P6MgrDQ4sgyfMpwbpzqG3TYYUJvKEW1jfw6FBHbwsLukQ1knztPutqk2MKRru"
       });
     });
 
@@ -372,7 +424,7 @@ describe("onRpcRequest", () => {
             role,
             accountIndex
           },
-          nonce: 0
+          nonce: 1
         }
       });
 
@@ -393,7 +445,7 @@ describe("onRpcRequest", () => {
 
       expect(await response).toRespondWith({
         buffer:
-          "#DSrGaeRFFKdevEfiPofsYYAV4QCL3ux2r1yGap8vPSGNTU2sYM97K8sJgXXnxKKSx2sEwN2eieKjH9bWPhfcXSVoVJTB1Sk3sr6f7DTc3dwPfJ2wwRAEAwyXf3nHAzCRb"
+          "#DSrGaeRFFKdevEfiPofsYYAV4QCL3ux2r1yGap8vPSGNTU2sYM97K8sJgXXnxKKSx2sEwN2eieKjH9bWPhfcXSVoVJVoiwrsfZyKgMsTEvEEwdG73RsUCe9KWVTAdcEqZ"
       });
     });
 
@@ -415,7 +467,7 @@ describe("onRpcRequest", () => {
             role,
             accountIndex
           },
-          nonce: 0
+          nonce: 1
         }
       });
 
@@ -435,7 +487,7 @@ describe("onRpcRequest", () => {
 
       expect(await response).toRespondWith({
         buffer:
-          "#FZ6E2HYaifQzeQcb65G3K655Y78FjGxarYE2hqRVQZdfzN5MzTSQeyFHrW6vdurgYZemzZqYXjoRyxwEJyPav3kv8uAZKg3juyTpSTowhEUiC22YVkWWwcDkHeaftuZHY"
+          "#FZ6E2HYaifQzeQcb65G3K655Y78FjGxarYE2hqRVQZdfzN5MzTSQeyFHrW6vdurgYZemzZqYXjoRyxwEJyPav3kv8uDC3BAZhhLV6iEEUEwxzRBF5xnYsCLNXPrDVb9a2"
       });
     });
 
@@ -458,7 +510,7 @@ describe("onRpcRequest", () => {
             role,
             accountIndex
           },
-          nonce: 0
+          nonce: 1
         }
       });
 
@@ -478,7 +530,7 @@ describe("onRpcRequest", () => {
 
       expect(await response).toRespondWith({
         buffer:
-          "#Niqfh4vftYfuUnBRrEjDzWkVrXAd896kWcfb3vT5hmnNmehuMoQvr9WueYPU4ZyGtrGG75pmAU3juvUsAuSvhfvybUKw3XNsUrH25yfzLPMsts1vUWV3uqKMa7vAaudAQEmhL63iiEEtbfbgmLBjDYhJXP7dSrKmi4Mj9ajNMXWiKFtC4AUwpGxfqcPVkuLK28PRsTFzmDEv8HMc9znMMs5qbvdHVteqcFXCzFFZir7QiuRDbLZuNxYYaStGx6E1DJs8Kw8ggfhtr5nqcBFnCagBteJ7ufqd4fvXA6q53j4o56ENns62nQ8o8kzYUTJJCYS6Ca9194u9VYCRXnkYxVTvArNeHPwKYjZfWdHot33CDV6VPvJW8xy9KwWBEwxxpsTmoTjtcuXXvcjtNcRPYfs8YVDCujXSg3sBmsUiyjweVvGnu1rm7k1gS9EXtXAp7vdu2RNGfQuSju7vYarEX2nAL7t12JsFZe9p7TJPtAidG5Dng7GEw12VKKJg92CnoMoPwbHfuFro8uKRUHRG2vM3nWW4izmFJQ6Kexbjp6no9RDxy5kxLfRVNsRkGRChSzwMEfVFZujTxiPXUZc21bpjS7p4g4cKCao2qpuYLEoCPaLkZ2XR61XxXSRx4brTAuNLnxqmzd7otkRnuHrpXAMZSwQvfipwWUatfcYwEtN9xFi2N8FiTfKEvUsVLYrCZ5NqQKRgNb6P3cyNKdQcgijTHJHo72Q3eqDyiAjEkNPqjCEou9BqPbQs9vN9KFohJiqw5rbKcfmZarykC91pnGbUdTPCmfZopsBb6ogYpqpiLZTuwifrwAN6JhFL9VVX331pRwF9RjQvu6d2mfJnj2W4Bwp97gKfhD3VesVwgU1sBo9pExkdWgtTrBY94UUQ6fyEmQHWcBvzWcHWW1mqvyxFCwY9cDjBMQ8UekaB9kW4JM61t3xp5KNVAXeBNGv92HEqmn62pFe94nJ35RkDEuzwNr43mpoGgQovE4u1q587uhsyywxP12Va9iuuP898EFUNG2o7RRckD1wxPwcZ1z9xZUCXkwDfJik7uM6ZVGZHkK2M6CD2eBGKqWjZ3KtKerpUr76fhj2SbxG39LuXM3x6W8Gk565nocBtmTRhTjWbnYeZbFxxk47gxUHSShsaPUqWNNBBa2Ce7ToFdH12WDQ67P7yDxcZwWYFvpgtwDCGBwUg9iMAtGLBtoREfqfzn5JxboTxxaePMPAN4UQuiMxufDAgNDsaoUY5vyw72avUckRXCcgStx1enRR5g1xvR7pJddJDZuxZcxCCpqbjMR5jUnURMgzijPsVXdsMikbhGp84qunGecas3xJn4egzmQLNu3zspvcoPrSD1CQnMxY9B8j331CSp4agJMyjQfxZALPzzxmvDQRquHGzYgqseaVua5e6RdNpU7zqPuu9d4Q9U3duwk9hhMDHiHUvHbFXaTuQNyjz5ZSgii5ZQN3CHEQTZ1jBBKdHZ"
+          "#Niqfh4vftYfuUnBRrEjDzWkVrXAd896kWcfb3vT5hmnNmehuMoQvr9WueYPU4ZyGtrGG75pmAU3juvUsAuSvhfvybUPryi8MeekXTTsLbxuPimsPQbY4hvD882gmvyE71zgC7sBtspRgG96UdbjWT9JQU1gjMvK2JFtyXkSfC8xQDYAPQuXqiMQPhe1XmdEEXm89AaHMCQuxt4pV4KJWrq4LbzFLtLtoJryhFJ38H1XPTVKQyqGMe5UdpminXKeJrUGT7sGmD5n76m7ZDS5tecDCWJ3UwX5otnNwx1BWQCDTDz9TH5f9dKL1jH5vTQYRdg15SyKbAJ6drwy5EfkBjE9Q8oE5ANfFTxetAHRQ2p45r3bKSHdPiZo2KZ6CjFcP7GWQqPRgQ5j1W34h88BGH9xrYGwXqn9iYv1BfxFUBYdBfnf2apW13HYRP2gh27iooRuxSdbr5UGW9dbueBcD5th43rTuSZc9TYUFpneWDxqPAYei6qDmU66UPVEpZVCt2tE5PHg8UbHTBNxPQqBrJxLcfK3M2Tczs3VNLat4FJ1X6RDymHJTmPWa7g8BSdddi3Wf2r7u2FF8gDSHqanVqwfBy5UC4EYjNAtvpgjmuhMsiesvngAfzE949sxYvBBS4y6c1N7Qz8wmDBa6w5UKdbfxmBu3j1GKsXiKyL4aH7psrbn4UXjmLeM71hp6osrGRCFUZpcF7MNVeVdmYKs2g1RBeeAJfMJVTziatUnEXhdBATpfyuHmSNXm9ZgeXUnpSgLgGiYE4DycsGdspepy9dsV2fsfMHp2KpQ17CAhW2hTDtECk4HaefridZiT3HoRXm2Mwv2VHfZcmgjmLyyZJudKFKqzGR9s1ueR6i6LkWh1kbsXfNSeVzGZXwVYf99xWM6ktbYNi4NNgRb3cpKAipCrHj2Tso9RcMFPbW6tJHhsBrSFNHBEZ2PVHcsXET1tEUAeQY3Rn7RgzbU2HiJkXqmBDNW8UNxAnqvGQSuqDCh8c784SseQvGEJMNdPGAzbCxuch9rwHdyxKhKU7vQ94MY9MmCsf49pAJwjEYUFudDhe2MHDtXj2hMAwJVzFh25huEsihgvDc4KoKwwUmxKEEuzBzna7u2Qjx8wsWnRGXNT5brzccb4QjTWkvq4h7sx6AjjBsgUgJvN1j5i5BsAqcyVjJUyoV1hqHtEkHeJKH3oKmqPe5pawmjvgFb7Agpi4WEHQzQS9E4YKR9KKcHqyAjVJEweZhH9FcTVi4H7yLwk626M653AHEXXRYNL3ftA2ntoyYP28a1ENDEaXWbyR4zY98fxfYcpkVdh2AUW6iJAVmXq2rmnarYcERxxW5ZsCoQkDRzPboDpEfcKjCw5gXvkYSfPsK2hFekYxVieiXEN9kxCPT3CTVX1khGCWSmB9Hs3QUR5yFBv9ARToxihZuXX4jNmCKB8tUpChmTS6S2fNTKXPQNnP48B76SJnRf5mSw9mZVTLhyRM"
       });
     });
 
@@ -597,7 +649,7 @@ describe("onRpcRequest", () => {
             role,
             accountIndex
           },
-          nonce: 0
+          nonce: 1
         }
       });
 
@@ -628,7 +680,7 @@ describe("onRpcRequest", () => {
             accountIndex
           },
           secondKey,
-          nonce: 0
+          nonce: 1
         }
       });
 
@@ -640,9 +692,7 @@ describe("onRpcRequest", () => {
       expect(await response).toRespondWithError({
         code: -32603,
         data: {
-          cause: expect.stringContaining(
-            "public key requires STM prefix, but was given `randominvaliddata`"
-          )
+          cause: expect.stringContaining("public key requires prefix: STM")
         },
         message: "Failed to encrypt",
         stack: expect.any(String)
