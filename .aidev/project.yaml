@@ -30,7 +30,7 @@ branches:
 # How this project's suites execute (#13892): one kind, stated once.
 environment:
   kind: "container"
-  image: "registry.gitlab.syncad.com/hive/metamask-snap/aidev-tests@sha256:b264493a9d1051d499740d3e25a2c8dc6042a152b1baaefe789c2991bd629bd2"
+  image: "registry.gitlab.syncad.com/hive/metamask-snap/aidev-tests@sha256:b7e951caad976166be6ab3e9efc8952e1c71811a241a8b9b2f1163984c8d848c"
   inputs: ["pnpm-lock.yaml", ".aidev/runtime/Dockerfile"]
 
 issues:

@@ -9,7 +9,7 @@ describe("onRpcRequest", () => {
       const { request } = await installSnap();
 
       const transaction =
-        '{"ref_block_num":63366,"ref_block_prefix":725696404,"expiration":"2025-04-23T19:38:24","operations":[{"type":"transfer_operation","value":{"from":"alice","to":"bob","amount":{"nai": "@@000000021", "precision": 3, "amount": "10"}}}]}';
+        '{"ref_block_num":63366,"ref_block_prefix":725696404,"expiration":"2025-04-23T19:38:24","operations":[{"type":"transfer_operation","value":{"from":"alice","to":"bob","amount":{"nai": "@@000000021", "precision": 3, "amount": "10"},"memo":""}}],"extensions":[],"signatures":[]}';
       const role = "active";
       const accountIndex = 0;
 
@@ -53,7 +53,7 @@ describe("onRpcRequest", () => {
       const { request } = await installSnap();
 
       const transaction =
-        '{"ref_block_num":63366,"ref_block_prefix":725696404,"expiration":"2025-04-23T19:38:24","operations":[{"type":"comment_operation","value":{"parent_author":"","parent_permlink":"test","author":"alice","permlink":"test-post","title":"Test Post","body":"This is a test post","json_metadata":"{}"}}]}';
+        '{"ref_block_num":63366,"ref_block_prefix":725696404,"expiration":"2025-04-23T19:38:24","operations":[{"type":"comment_operation","value":{"parent_author":"","parent_permlink":"test","author":"alice","permlink":"test-post","title":"Test Post","body":"This is a test post","json_metadata":"{}"}}],"extensions":[],"signatures":[]}';
       const role = "posting";
       const accountIndex = 0;
 
@@ -88,7 +88,7 @@ describe("onRpcRequest", () => {
       const { request } = await installSnap();
 
       const transaction =
-        '{"ref_block_num":63366,"ref_block_prefix":725696404,"expiration":"2025-04-23T19:38:24","operations":[{"type":"account_update_operation","value":{"account":"alice","owner":{"weight_threshold":1,"account_auths":[],"key_auths":[["STM7dZqKctC8FGfbRbFbZzWcD3hyiGkiqm2zvTkJR63hiK4hRbasJ",1]]},"active":{"weight_threshold":1,"account_auths":[],"key_auths":[["STM61Aj5W2GsLHgicnc7BDAXxhEHRkwaS6MhUyob9t1gUV1HBnN3X",1]]},"posting":{"weight_threshold":1,"account_auths":[],"key_auths":[["STM6Lz7F4qHndy5dKV2GQ94AsF7iFT8i6X7hJqGEKfMsgSyYq6z1F",1]]},"memo_key":"STM7FUkohAwxVdGmkQrmksDZ6icTAMu5344gmVvnLh5CKQwQGEhQF","json_metadata":"{}"}}]}';
+        '{"ref_block_num":63366,"ref_block_prefix":725696404,"expiration":"2025-04-23T19:38:24","operations":[{"type":"account_update_operation","value":{"account":"alice","owner":{"weight_threshold":1,"account_auths":[],"key_auths":[["STM7dZqKctC8FGfbRbFbZzWcD3hyiGkiqm2zvTkJR63hiK4hRbasJ",1]]},"active":{"weight_threshold":1,"account_auths":[],"key_auths":[["STM61Aj5W2GsLHgicnc7BDAXxhEHRkwaS6MhUyob9t1gUV1HBnN3X",1]]},"posting":{"weight_threshold":1,"account_auths":[],"key_auths":[["STM6Lz7F4qHndy5dKV2GQ94AsF7iFT8i6X7hJqGEKfMsgSyYq6z1F",1]]},"memo_key":"STM7FUkohAwxVdGmkQrmksDZ6icTAMu5344gmVvnLh5CKQwQGEhQF","json_metadata":"{}"}}],"extensions":[],"signatures":[]}';
       const role = "owner";
       const accountIndex = 0;
 
@@ -123,7 +123,7 @@ describe("onRpcRequest", () => {
       const { request } = await installSnap();
 
       const transaction =
-        '{"ref_block_num":63366,"ref_block_prefix":725696404,"expiration":"2025-04-23T19:38:24","operations":[{"type":"transfer_operation","value":{"from":"alice","to":"bob","amount":{"nai": "@@000000021", "precision": 3, "amount": "10"}}}]}';
+        '{"ref_block_num":63366,"ref_block_prefix":725696404,"expiration":"2025-04-23T19:38:24","operations":[{"type":"transfer_operation","value":{"from":"alice","to":"bob","amount":{"nai": "@@000000021", "precision": 3, "amount": "10"},"memo":""}}],"extensions":[],"signatures":[]}';
       const role = "active";
       const accountIndex = 0;
       const chainId = "42";
@@ -176,7 +176,7 @@ describe("onRpcRequest", () => {
       const { request } = await installSnap();
 
       const transaction =
-        '{"ref_block_num":63366,"ref_block_prefix":725696404,"expiration":"2025-04-23T19:38:24","operations":[{"type":"transfer_operation","value":{"from":"alice","to":"bob","amount":{"nai": "@@000000021", "precision": 3, "amount": "10"}}}]}';
+        '{"ref_block_num":63366,"ref_block_prefix":725696404,"expiration":"2025-04-23T19:38:24","operations":[{"type":"transfer_operation","value":{"from":"alice","to":"bob","amount":{"nai": "@@000000021", "precision": 3, "amount": "10"},"memo":""}}],"extensions":[],"signatures":[]}';
 
       const origin = "Jest";
       const response = request({
@@ -389,7 +389,7 @@ describe("onRpcRequest", () => {
         code: -32000,
         message: "Invalid transaction format",
         data: {
-          cause: expect.stringContaining("Parse Error")
+          cause: expect.stringContaining("JSON")
         },
         stack: expect.any(String)
       });
