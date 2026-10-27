@@ -1,4 +1,12 @@
-image: node:24.21.0
+# Node comes from common-ci-configuration: its node-test-tools image carries the
+# Node version ccc's docker-bake.hcl sets (NODE_VERSION), so this file pins none.
+include:
+  - project: "hive/common-ci-configuration"
+    ref: develop
+    file:
+      - "/templates/base.gitlab-ci.yml"
+
+image: "${NODE_TEST_TOOLS_IMAGE}"
 
 stages:
   - .pre

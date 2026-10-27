@@ -43,13 +43,16 @@ Differences from CI:
 
 ## The test runtime image (`runtime/`)
 
-The suites run in a container with `--network none` and your uid. The image carries
-Node 24.21.0 (CI's `image: node:24.21.0`), jq, pnpm (from package.json `packageManager`,
-through corepack) and a pnpm store filled with `pnpm fetch`. `pnpm-deps.sh` installs
-`node_modules` offline from it, with `--ignore-scripts` as in CI.
+The suites run in a container with `--network none` and your uid. The image is built
+on common-ci-configuration's `node-test-tools:develop` (CI's `image: ${NODE_TEST_TOOLS_IMAGE}`),
+which carries Node and jq at the versions ccc's `docker-bake.hcl` sets; it adds pnpm (from
+package.json `packageManager`, through corepack) and a pnpm store filled with `pnpm fetch`.
+`pnpm-deps.sh` installs `node_modules` offline from it, with `--ignore-scripts` as in CI.
 
 When `pnpm-lock.yaml`, `pnpm-workspace.yaml`, `.npmrc`, `packageManager` or
-`runtime/Dockerfile` change, rebuild and re-pin **in the same commit**:
+`runtime/Dockerfile` change, rebuild and re-pin **in the same commit**. The input hash also
+covers the digest `node-test-tools:develop` names, so after ccc republishes it (a Node
+bump) the same command builds a new image to re-pin:
 
 ```bash
 .aidev/runtime/build.sh --push   # registry digest if aidev-<input hash> exists, else build + push
