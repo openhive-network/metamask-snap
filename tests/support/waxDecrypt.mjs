@@ -7,7 +7,7 @@ import { createWaxFoundation } from "@hiveio/wax";
 const [wifPrivateKey, memo] = process.argv.slice(2);
 
 const wax = await createWaxFoundation();
-const beekeeper = await createBeekeeper({ inMemory: true, enableLogs: false });
+const beekeeper = await createBeekeeper({ inMemory: true });
 const { wallet } = await beekeeper
   .createSession("waxDecrypt")
   .createWallet("waxDecrypt", "waxDecrypt", true);
