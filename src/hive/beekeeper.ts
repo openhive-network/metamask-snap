@@ -24,7 +24,6 @@ const getBeekeeperSession = async (): Promise<IBeekeeperSession> => {
     providePerformanceClock();
 
     return (_session = createBeekeeper({
-      enableLogs: false,
       inMemory: true
     }).then((beekeeper) => {
       const array = new Uint32Array(1);
