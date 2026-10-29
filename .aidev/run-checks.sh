@@ -6,8 +6,7 @@
 #
 #   lint       ESLint (package.json `lint`, CI's lint job)
 #   typecheck  tsc --noEmit over src/, tests/ and snap.config.ts (tsconfig.json).
-#              Not bound to a slot: CI doesn't run it and it fails today
-#              (TS5110, `module` must be Node16 with `moduleResolution: node16`).
+#              CI has no tsc job; ts-jest type-checks only the specs it runs.
 #   snapper    scripts/snapper.sh, the security analysis package.json `prebuild`
 #              runs before every `pnpm build`
 #   build      `mm-snap build` (CI's build job) -> dist/bundle.js. The build
