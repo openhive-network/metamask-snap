@@ -18,13 +18,13 @@ the failure body. The Jest suite also writes one case per test to `jest-junit.xm
 | `manifest-shasum` | (after `build`) pass when the build left `snap.manifest.json` as committed, skipped otherwise |
 | `test` | Jest + `@metamask/snaps-jest` against `dist/bundle.js` (CI's test job) |
 | `reproducible` | `scripts/check-reproducible-build.sh`: builds two copies of the checkout at different absolute paths, fails unless `dist/bundle.js` and the manifest shasum match (CI's `reproducible_build` job) |
-| `typecheck` | `tsc --noEmit`; not bound, it fails today (TS5110 in `tsconfig.json`) and CI doesn't run it |
+| `typecheck` | `tsc --noEmit` over `src/`, `tests/` and `snap.config.ts`; CI has no tsc job |
 
 | Slot | Steps |
 |---|---|
-| quick, canary | lint, snapper, build, test |
-| full | lint, snapper, build, test, reproducible |
-| static | lint, snapper |
+| quick, canary | lint, typecheck, snapper, build, test |
+| full | lint, typecheck, snapper, build, test, reproducible |
+| static | lint, typecheck, snapper |
 | baseline, coverage, system | build, test |
 
 Differences from CI:
