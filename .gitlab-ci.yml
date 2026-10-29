@@ -52,7 +52,7 @@ default:
 .npm_based_job:
   before_script:
     - corepack enable
-    - corepack prepare pnpm@10.0.0 --activate
+    - corepack prepare pnpm@10.33.0 --activate
     - pnpm config set store-dir .pnpm-store
     - git submodule status --recursive # which ccc catalog this job installs against
     # Frozen install; after a ccc catalog bump it reinstalls unfrozen and keeps the
