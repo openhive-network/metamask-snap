@@ -19,15 +19,15 @@ catalogs:
       version: 6.0.3
 
 overrides:
-  '@hiveio/beekeeper': 1.28.9-rc0-stable.261028200530
+  '@hiveio/beekeeper': 1.28.9-rc0-stable.261107004332
 
 importers:
 
   .:
     devDependencies:
       '@hiveio/beekeeper':
-        specifier: 1.28.9-rc0-stable.261028200530
-        version: 1.28.9-rc0-stable.261028200530
+        specifier: 1.28.9-rc0-stable.261107004332
+        version: 1.28.9-rc0-stable.261107004332
       '@hiveio/wax':
         specifier: catalog:hiveio-toolset
         version: 1.28.8-stable.261028191145
@@ -822,8 +822,8 @@ packages:
     resolution: {integrity: sha512-XBEKsYqLGXLah9PNJbgdkigthkG7TAGvlD/sH12beMXEyHDyigfcbdvHhmLyDWgDyOJn4QwiQUaF7yeuhnjdog==}
     engines: {node: '>=18'}
 
-  '@hiveio/beekeeper@1.28.9-rc0-stable.261028200530':
-    resolution: {integrity: sha1-nzTNga2OqN6212HzkKyHGZoMuAk=, tarball: https://gitlab.syncad.com/api/v4/projects/558/packages/npm/@hiveio/beekeeper/-/@hiveio/beekeeper-1.28.9-rc0-stable.261028200530.tgz}
+  '@hiveio/beekeeper@1.28.9-rc0-stable.261107004332':
+    resolution: {integrity: sha1-ifkOP0eWUWOz3pf8Th5gGA4Ux+Q=, tarball: https://gitlab.syncad.com/api/v4/projects/558/packages/npm/@hiveio/beekeeper/-/@hiveio/beekeeper-1.28.9-rc0-stable.261107004332.tgz}
     engines: {node: '>=24'}
 
   '@hiveio/wax@1.28.8-stable.261028191145':
@@ -5887,7 +5887,7 @@ snapshots:
       '@ethereumjs/rlp': 5.0.2
       ethereum-cryptography: 2.2.1
 
-  '@hiveio/beekeeper@1.28.9-rc0-stable.261028200530': {}
+  '@hiveio/beekeeper@1.28.9-rc0-stable.261107004332': {}
 
   '@hiveio/wax@1.28.8-stable.261028191145':
     dependencies:
